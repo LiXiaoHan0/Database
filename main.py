@@ -138,9 +138,10 @@ class table: # 自定义表格
 # ------------------------ 登录界面函数 ----------------------------
 
 def check_login(*arg): # 登录检验
-    global power
-    power=login_check(l_e1.get(),l_e2.get())
-    if(power!=0): login.destroy()
+    pass
+    # global power
+    # power=login_check(l_e1.get(),l_e2.get())
+    # if(power!=0): login.destroy()
 
 
 def sign_in(): # 注册界面
@@ -148,32 +149,33 @@ def sign_in(): # 注册界面
     class sign_subform(subform): # 继承
 
         def submit_data(self,*event):
-            edits=[self.edit[i].get() for i in range(3)]
+            pass
+            # edits=[self.edit[i].get() for i in range(3)]
 
-            if(inspect('' if self.flag[0] else edits[0],'str',0,1,15)): 
-                self.first_edit(event,0)
-                return
-            if(inspect('' if self.flag[1] else edits[1],'str',0,5,15)): 
-                self.first_edit(event,1)
-                return
-            if(inspect('' if self.flag[2] else edits[2],'str',0,5,15)): 
-                self.first_edit(event,2)
-                return
+            # if(inspect('' if self.flag[0] else edits[0],'str',0,1,15)): 
+            #     self.first_edit(event,0)
+            #     return
+            # if(inspect('' if self.flag[1] else edits[1],'str',0,5,15)): 
+            #     self.first_edit(event,1)
+            #     return
+            # if(inspect('' if self.flag[2] else edits[2],'str',0,5,15)): 
+            #     self.first_edit(event,2)
+            #     return
 
-            ans=signin(edits[0],edits[1],edits[2])
-            if(ans[0]):
-                self.form.destroy()
-            else:
-                self.edit[ans[1]].focus_set()
+            # ans=signin(edits[0],edits[1],edits[2])
+            # if(ans[0]):
+            #     self.form.destroy()
+            # else:
+            #     self.edit[ans[1]].focus_set()
 
-    sign_subform(login,'新用户注册',[('账号：','请输入账号名'),('密码：','至少输入五位字符'),('确认密码：','请再次输入密码')])
+    sign_subform(login,'新用户注册',[('姓名：','请输入您的姓名'),('年龄：','请输入您的年龄'),('性别：','男/女'),('密码：','请设置登录密码'),('确认密码：','请再次输入密码')])
 
 
 # ------------------------- 登录界面布局 -----------------------------
 
-login = Tk()
-login.title("登录")
-login.geometry("360x180+"+str((screen_x-360)//2)+"+"+str((screen_y-200)//2))
+login=root
+login.title("北京冬奥会信息管理系统")
+login.geometry("450x250+"+str((screen_x-360)//2)+"+"+str((screen_y-200)//2))
 login.resizable(width=False, height=False)
 
 l_frm=Frame(login)
@@ -181,13 +183,13 @@ l_v1=StringVar()
 l_v2=StringVar()
 
 import tkinter # 引入图片
-pic=tkinter.PhotoImage(file="homework.gif")
+pic=tkinter.PhotoImage(file="dream.gif")
 
-Label(l_frm,width=64,height=64,image=pic).grid(row=1,column=0,columnspan=2,rowspan=2,padx=5,pady=10)
-Label(l_frm, text='账号：',font=('Arial',12)).grid(row=1, column=3)
-Label(l_frm, text='密码：',font=('Arial',12)).grid(row=2, column=3)
-l_e1=Entry(l_frm,width=20,textvariable=l_v1)
-l_e2=Entry(l_frm,width=20,textvariable=l_v2,show='*')
+Label(l_frm,width=150,height=180,image=pic).grid(row=1,column=0,columnspan=2,rowspan=3,padx=5,pady=10)
+Label(l_frm, text='账号：',font=('Arial',15)).grid(row=1, column=2,columnspan=2)
+Label(l_frm, text='密码：',font=('Arial',15)).grid(row=2, column=2,columnspan=2)
+l_e1=Entry(l_frm,font=('Arial',15),width=15,textvariable=l_v1)
+l_e2=Entry(l_frm,font=('Arial',15),width=15,textvariable=l_v2,show='*')
 
 # 绑定回车键&上下键
 def e_press_key(event,index):
@@ -202,8 +204,8 @@ l_e2.bind('<Key>',lambda event:e_press_key(event,2))
 # 组件定位
 l_e1.grid(row=1,column=4,padx=5,pady=10,columnspan=3)
 l_e2.grid(row=2,column=4,padx=5,pady=10,columnspan=3)
-Button(l_frm,text="登录",width=8,font=('Arial',12),command=check_login).grid(row=3,column=1,columnspan=3,pady=15)
-Button(l_frm,text="注册",width=8,font=('Arial',12),command=sign_in).grid(row=3,column=5,pady=15)
+Button(l_frm,text="登录",width=6,font=('Arial',15),command=check_login).grid(row=3,column=2,columnspan=3,pady=15,padx=5)
+Button(l_frm,text="注册",width=6,font=('Arial',15),command=sign_in).grid(row=3,column=5,columnspan=2,pady=15,padx=5)
 l_frm.pack(padx=20,pady=20)
 
 # 设置程序图标
