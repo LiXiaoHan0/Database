@@ -6,13 +6,17 @@ from tkinter import ttk # 树状表格
 flag=0 # 连接情况
 power=0 # 权限等级
 alter=0 # 是否修改
+root=Tk() # 根窗口
+screen_x=root.winfo_screenwidth() # 屏幕宽度
+screen_y=root.winfo_screenheight() # 屏幕高度
 
 # ------------------------- 全局类 -----------------------------
 
 class subform: # 输入框界面
 
-    def __init__(self,father,title,que): # 父容器，标题，标签及默认值
+    def __init__(self,father,title,que,submit): # 父容器，标题，标签及默认值
         l=len(que)
+        self.submit_data=submit
 
         form=Toplevel(father)
         form.title(title)
@@ -53,19 +57,18 @@ class subform: # 输入框界面
             self.flag[index]=False
         if(not self.edit[index].select_present()): self.edit[index].focus_set()
 
-    def submit_data(self,*event): # 具体问题具体设置
-        pass
-
     def exit_form(self):
         self.form.destroy()
 
 
 class table: # 自定义表格
 
-    def __init__(self,father,num,heads): # 初始化
+    def __init__(self,father,num,heads,search,modify=False): # 初始化
         self.data=[]
         self.far=father
         self.heads=heads
+        self.modify=modify
+        self.search=search
         self.ybar=Scrollbar(father,orient='vertical')
         self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set)
         self.ybar['command']=self.chart.yview
@@ -92,10 +95,10 @@ class table: # 自定义表格
                 method([tmp.set(k,"课程号") for k in tmp.selection()])
                 self.search_data(0)
 
-    def search_data(self,t,*arg): # 获取数据
+    def search_data(self,*arg): # 获取数据
         for i in self.chart.get_children(''):
             self.chart.delete(i)
-        self.data=search(t,arg)
+        self.data=self.search(arg)
         for i,val in enumerate(self.data):
             self.chart.insert('',i,values=val)
 
@@ -103,24 +106,25 @@ class table: # 自定义表格
         print(val,cn,rn,col,row)
 
     def change_data(self,event): # 修改数据
-        tmp=self.chart
-        col= tmp.identify_column(event.x) # 列节点
-        row = tmp.identify_row(event.y) # 行节点
-        cn=int(str(col).replace('#','')) # 获取列数
-        rn=(event.y-6)//20 # 获取行数
+        if(self.modify):
+            tmp=self.chart
+            col= tmp.identify_column(event.x) # 列节点
+            row = tmp.identify_row(event.y) # 行节点
+            cn=int(str(col).replace('#','')) # 获取列数
+            rn=(event.y-6)//20 # 获取行数
 
-        def finish_edit(event):
-            if(edit.get()!=''):
-                self.save_change(edit.get(),cn,rn,col,row)
-            edit.destroy()
+            def finish_edit(event):
+                if(edit.get()!=''):
+                    self.save_change(edit.get(),cn,rn,col,row)
+                edit.destroy()
 
-        if(len(self.data)>=rn and rn>0):
-            Str_v=StringVar()
-            edit=Entry(self.far,width=(self.heads[1][cn]-self.heads[1][cn-1])//8,textvariable=Str_v)
-            edit.focus_set()
-            edit.bind('<FocusOut>',finish_edit)
-            # edit.bind('<Return>',self.save_change)
-            edit.place(x=self.heads[1][cn-1]*15//16+self.heads[1][cn]//16,y=rn*20+16)
+            if(len(self.data)>=rn and rn>0):
+                Str_v=StringVar()
+                edit=Entry(self.far,width=(self.heads[1][cn]-self.heads[1][cn-1])//8,textvariable=Str_v)
+                edit.focus_set()
+                edit.bind('<FocusOut>',finish_edit)
+                # edit.bind('<Return>',self.save_change)
+                edit.place(x=self.heads[1][cn-1]*15//16+self.heads[1][cn]//16,y=rn*20+16)
 
     def export_info(): # 导出数据
         pass
@@ -134,7 +138,7 @@ class table: # 自定义表格
 
 def check_login(*arg): # 登录检验
     global power
-    power=check(l_e1.get(),l_e2.get())
+    power=login_check(l_e1.get(),l_e2.get())
     if(power!=0): login.destroy()
 
 
@@ -168,8 +172,6 @@ def sign_in(): # 注册界面
 
 login = Tk()
 login.title("登录")
-screen_x=login.winfo_screenwidth() # 屏幕宽度
-screen_y=login.winfo_screenheight() # 屏幕高度
 login.geometry("360x180+"+str((screen_x-360)//2)+"+"+str((screen_y-200)//2))
 login.resizable(width=False, height=False)
 
