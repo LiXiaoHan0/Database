@@ -11,9 +11,7 @@ screen_x=root.winfo_screenwidth() # 屏幕宽度
 screen_y=root.winfo_screenheight() # 屏幕高度
 
 # ------------------------- 全局类 -----------------------------
-#我改了一下
-#123123
-#111111
+
 class subform: # 输入框界面
 
     def __init__(self,father,title,que,submit): # 父容器，标题，标签及默认值
