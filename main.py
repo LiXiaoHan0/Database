@@ -1,7 +1,9 @@
 from tkinter import *
 from oracle import *
 from tkinter import ttk # 树状表格
-
+#32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
+#import os
+#os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 # 全局变量
 flag=0 # 连接情况
 power=0 # 权限等级
