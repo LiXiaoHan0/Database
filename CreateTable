@@ -1,0 +1,89 @@
+--场馆表
+create table Venue(
+VNo char(3) not null,
+VName varchar2(20) not null,
+Position varchar2(30) not null,
+constraint VenuePK primary key(VNo)
+);
+--用户表
+create table Users(
+UName varchar2(20) not null,
+Age number(3,0) not null,
+Sex char(2) not null,
+Account char(8) not null,
+Password varchar2(20) not null,
+constraint UserPK primary key (Account)
+);
+--志愿任务表
+create table Assign(
+ANo char(8) not null,
+Detail varchar2(300) not null,
+Venue char(3) not null,
+constraint AssignPK primary key(ANo),
+constraint AssignFK foreign key(Venue) references Venue(VNo)
+);
+--访客、志愿者表
+create table Visitor_Volunteer(
+Account char(8) not null,
+State number(1,0) default 0 not null,
+Assign char(8) null,
+constraint VisPK primary key (Account),
+constraint VisFK foreign key (Assign) references Assign(ANo)
+);
+--管理员表
+create table Admin(
+Account char(8) not null,
+constraint AdminPK primary key (Account)
+);
+--赛事表
+create table Match(
+MNo char(3) not null,
+Event varchar(30) not null,
+Time char(20) not null,
+Total number(4,0) not null,
+Remain number(4,0) not null,
+Price number(5,2) not null,
+Venue char(3) not null,
+constraint MatchPK primary key(MNo),
+constraint MatchFK foreign key(Venue) references Venue(VNo)
+);
+--商品表
+create table Item(
+INo char(3) not null,
+IName varchar2(20) not null,
+Price number(5,2) not null,
+Storage number(5,0) not null,
+constraint ItemPK primary key(INo)
+);
+--购票订单
+create table TicketDeal(
+DNo char(8) not null,
+Time date not null,
+Sum number(6,2) not null,
+Account char(8) not null,
+constraint TicketDealPK primary key(DNo),
+constraint TicketDealFK foreign key(Account) references Visitor_Volunteer(Account)
+);
+--购物订单
+create table ItemDeal(
+DNo char(8) not null,
+Time date not null,
+Sum number(6,2) not null,
+Account char(8) not null,
+constraint ItemDealPK primary key(DNo),
+constraint ItemDealFK foreign key(Account) references Visitor_Volunteer(Account)
+);
+--门票订单信息
+create table TicketSale(
+DNo char(8) not null,
+MNo char(3) not null,
+Quantity number(3,0) not null,
+constraint TicketSalePK primary key (DNo,MNo)
+);
+--商品订单信息
+create table ItemSale(
+DNo char(8) not null,
+INo char(3) not null,
+Quantity number(3,0) not null,
+constraint ItrmSalePK primary key (DNo,INo)
+);

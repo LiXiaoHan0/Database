@@ -11,7 +11,7 @@ screen_x=root.winfo_screenwidth() # 屏幕宽度
 screen_y=root.winfo_screenheight() # 屏幕高度
 
 # ------------------------- 全局类 -----------------------------
-#我改了一下
+
 class subform: # 输入框界面
 
     def __init__(self,father,title,que,submit): # 父容器，标题，标签及默认值
@@ -37,15 +37,15 @@ class subform: # 输入框界面
             elif(event.keycode==40): self.first_edit(event,(index+1)%l)
         
         for i,txt in enumerate(que):
-            Label(frm,text=txt[0],font=('Arial',12)).grid(row=i, column=0,columnspan=2)
+            Label(frm,text=txt[0],font=('SimHei',12)).grid(row=i, column=0,columnspan=2)
         for i,e in enumerate(str_e):
             e.insert(0,que[i][1]) # 默认值
             e.bind('<Button-1>',lambda event,_i=i:self.first_edit(event,_i)) # 初次编辑判定
             e.bind('<Return>',self.submit_data) # 绑定回车键
             e.bind('<Key>',lambda event,_i=i:press_key(event,_i+l)) # 绑定上下键
             e.grid(row=i,column=3,padx=5,pady=10,columnspan=4)
-        Button(frm,width=8,text="退出",font=('Arial',12),command=self.exit_form).grid(row=l,column=1,pady=10,columnspan=2)
-        Button(frm,width=8,text="提交",font=('Arial',12),command=self.submit_data).grid(row=l,column=5,pady=10)
+        Button(frm,width=8,text="退出",font=('SimHei',12),command=self.exit_form).grid(row=l,column=1,pady=10,columnspan=2)
+        Button(frm,width=8,text="提交",font=('SimHei',12),command=self.submit_data).grid(row=l,column=5,pady=10)
 
         frm.pack()
         form.mainloop()
@@ -185,10 +185,10 @@ import tkinter # 引入图片
 pic=tkinter.PhotoImage(file="dream.gif")
 
 Label(l_frm,width=150,height=180,image=pic).grid(row=1,column=0,columnspan=2,rowspan=3,padx=5,pady=10)
-Label(l_frm, text='账号：',font=('Arial',15)).grid(row=1, column=2,columnspan=2)
-Label(l_frm, text='密码：',font=('Arial',15)).grid(row=2, column=2,columnspan=2)
-l_e1=Entry(l_frm,font=('Arial',15),width=15,textvariable=l_v1)
-l_e2=Entry(l_frm,font=('Arial',15),width=15,textvariable=l_v2,show='*')
+Label(l_frm, text='账号：',font=('SimHei',15)).grid(row=1, column=2,columnspan=2)
+Label(l_frm, text='密码：',font=('SimHei',15)).grid(row=2, column=2,columnspan=2)
+l_e1=Entry(l_frm,font=('SimHei',15),width=15,textvariable=l_v1)
+l_e2=Entry(l_frm,font=('SimHei',15),width=15,textvariable=l_v2,show='*')
 
 # 绑定回车键&上下键
 def e_press_key(event,index):
@@ -203,8 +203,8 @@ l_e2.bind('<Key>',lambda event:e_press_key(event,2))
 # 组件定位
 l_e1.grid(row=1,column=4,padx=5,pady=10,columnspan=3)
 l_e2.grid(row=2,column=4,padx=5,pady=10,columnspan=3)
-Button(l_frm,text="登录",width=6,font=('Arial',15),command=check_login).grid(row=3,column=2,columnspan=3,pady=15,padx=5)
-Button(l_frm,text="注册",width=6,font=('Arial',15),command=sign_in).grid(row=3,column=5,columnspan=2,pady=15,padx=5)
+Button(l_frm,text="登录",width=6,font=('SimHei',15),command=check_login).grid(row=3,column=2,columnspan=3,pady=15,padx=5)
+Button(l_frm,text="注册",width=6,font=('SimHei',15),command=sign_in).grid(row=3,column=5,columnspan=2,pady=15,padx=5)
 l_frm.pack(padx=20,pady=20)
 
 # 设置程序图标
@@ -212,3 +212,4 @@ l_frm.pack(padx=20,pady=20)
 
 flag=connect() # 连接数据库
 if(flag):login.mainloop()
+
