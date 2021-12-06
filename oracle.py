@@ -66,13 +66,25 @@ def finish(flag): # 关闭连接
 
 def check(account, password):    #登录检验
     try:
-        cursor.execute("select * from users where account='%s' and password='%s'" %(account,password))
+        cursor.execute("select * from users where account = '%s' and password = '%s'" %(account,password))
         res = cursor.fetchone()
         if (res == None):
             msg('err', '错误', '账号不存在或密码错误！')
-            return 0
+            return -1
         else:
-            return res
+            res = []
+            cursor.execute("select account, state, assign from visitor_volunteer where account = '%s'" %account)
+            if (cursor.fetchone() == None):
+                #是管理员
+                cursor.execute("select * from admin where account = '%s'" %account)
+                account = cursor.fetchone()
+                res.append((3, account))
+                return res
+            else:
+                #是visitor_volunteer
+                (account, state, assign) = cursor.fetchone()
+                res.append((state, account, assign))
+                return res
     except oracle.DatabaseError as e:
         msg('err', '错误', str(e))
 
@@ -97,6 +109,11 @@ def sign_in(name, age, sex, password, confirm):      #提交注册（return 根�
 def search(t, *arg):
     # t == 0 赛事门票查询
     # t == 1 商品查询
+    # t == 2 用户信息查询
+    if (t == 2):
+        try:
+            user_data = []
+            cursor.execute("select * from users where account='%s' and password='%s'")
 
 
 
