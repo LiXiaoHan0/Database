@@ -1,10 +1,11 @@
 from tkinter import *
+from types import BuiltinFunctionType
 from oracle import *
 from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-user_data=0 # 用户信息
+user_data=(0,'0','无',0,('无','无')) # 用户信息
 
 root=Tk() # 根窗口
 screen_x=root.winfo_screenwidth() # 屏幕宽度
@@ -78,13 +79,13 @@ class subform: # 输入框界面
 
 class table: # 自定义表格
 
-    def __init__(self,father,num,heads,search): # 初始化
+    def __init__(self,father,num,heads,position,method): # 初始化
         self.data=[]
         self.far=father
         self.heads=heads
-        self.search=search
+        self.search=method
         self.ybar=Scrollbar(father,orient='vertical')
-        self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set)
+        self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set).grid(row=position[0],column=position[1],rowspan=position[2],columnspan=position[3],pady=position[4],padx=position[5])
         self.ybar['command']=self.chart.yview
         for i,val in enumerate(heads[0]): # 设置表头
             self.chart.column(val,width=heads[1][i+1]-heads[1][i],anchor="center")
@@ -152,7 +153,7 @@ class table: # 自定义表格
 def check_login(*arg): # 登录检验
     print(l_e1.get(),l_e2.get()) # 所需数据
     global user_data
-    user_data=[0,'1','李晗','男','19岁'] # 示例
+    user_data=(2,'3','李晗','男','19岁',('冰立方','制冰')) # 示例
     # !!! 需要返回用户信息，第一个是权限、第二个是账号
     # -1:账号不存在或密码错误
     # 0:未申请为志愿者；
@@ -170,7 +171,7 @@ def sign_in(): # 注册界面
             self.get_data() # 刷新数据
             print(self.vars) # !!!
 
-    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置登录密码',0),('确认密码：','请再次输入密码',0)])
+    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置20以内密码',0),('确认密码：','请再次输入密码',0)])
 
 
 # ------------------------- 登录界面布局 -----------------------------
@@ -223,26 +224,63 @@ def clear(): # 清除页面布局
     global frm
     frm.destroy()
 
+# ------- 个人信息页面 --------
+
+def apply_volunteer(): # 申请成为志愿者
+    print(user_data[1])
+    if(True): # !!! 提供申请志愿者的账号，返回操作是否成功
+        user_data[0]=1
+        call_info()
+    
+def show_volunteer(): # 查看志愿任务分配
+    if(user_data[5][0]!=''):
+        msg('inf','志愿任务查看','您分配到的场馆为'+user_data[5][0]+'，您负责的工作是'+user_data[5][1]+'。')
+    else:
+        msg('inf','您还没有被分配具体任务！')
+
+# ------- 订票业务页面 --------
+
+
+
 
 # ------------------------- 操作界面子布局 -----------------------------
 
 def call_info(): # 个人信息页面
     clear()
-    info_frm=Frame(form)
     global frm
-    frm=info_frm
+    frm=Frame(form)
+    power=['群众','群众','志愿者','管理员']
 
-    Label(info_frm,width=160,height=160,image=user_pic).grid(row=1,column=0,rowspan=3,padx=50,pady=10)
+    # form.geometry("600x300")
+    Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=60)
     for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
-        Label(info_frm,text=txt,font=('SimHei',20)).grid(row=i,column=1,pady=10)
-        Label(info_frm,text=user_data[i+1],font=('SimHei',20)).grid(row=i,column=2,pady=10)
-    Label(info_frm,text="您的身份是："+"",font=('SimHei',20)).grid(row=4,column=0,columnspan=2,pady=50)
-    info_frm.pack(padx=20,pady=20)
+        Label(frm,text=txt+user_data[i+1],font=('SimHei',20),width=20,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)
+    Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=30)
+    if(user_data[0]==0):
+        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',16),command=apply_volunteer).grid(row=4,column=1,columnspan=2,pady=30,padx=20)
+    elif(user_data[0]==1):
+        Label(frm,text="志愿申请已提交",font=('SimHei',16)).grid(row=4,column=1,columnspan=2,pady=30,padx=20)
+    elif(user_data[0]==2):
+        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',16),command=show_volunteer).grid(row=4,column=1,columnspan=2,pady=30,padx=20)
+        
+    frm.pack(padx=20,pady=20)
 
 
 def call_ticket(): # 票务页面
     clear()
-    pass
+    global frm
+    frm=Frame(form)
+    heads1=[('比赛项目','比赛时间','门票剩余','门票价格（元）'),(0,80,180,250,320)]
+    heads2=[('比赛项目','购票数量','单项价格（元）'),(0,80,180,230,280)]
+
+    
+    Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0,pady=30,padx=50)
+    Label(frm,text="已选门票",font=('SimHei',16)).grid(row=0,column=0,pady=30,padx=50)
+    table(frm,12,heads1,(1,0,5,1,20,20),clear)
+    table(frm,6,heads2,(1,0,1,1,20,20),clear)
+    Label(frm,text="合计金额：0",font=('SimHei',16)).grid(row=0,column=0,pady=30,padx=50)
+    
+    
 
 
 def call_item(): # 商品页面
@@ -262,46 +300,47 @@ def call_volunteer(): # 志愿管理页面
 
 # ------------------------- 操作界面主布局 -----------------------------
 
-form=Tk()
-form.title("北京冬奥会信息管理系统：操作界面")
-form.geometry("650x400"+"+"+str((screen_x-650)//2)+"+"+str((screen_y-400)//2))
-form.resizable(width=False, height=False)
+if(user_data[0]>=0):
+    form=Tk()
+    form.title("北京冬奥会信息管理系统：操作界面")
+    form.geometry("600x300"+"+"+str((screen_x-600)//2)+"+"+str((screen_y-300)//2))
+    form.resizable(width=False, height=False)
 
-frm=Frame(form) # 页面框架
-option=Menu(form) # 菜单栏
-user_pic=tkinter.PhotoImage(file="user.gif") # 用户照片
-option.add_command(label ="个人信息",command=call_info)
-if(user_data[0]!=3):
-    option.add_command(label ="订票服务",command=call_ticket)
-    option.add_command(label ="购买商品",command=call_item)
-else:
-    option.add_command(label ="商品管理",command=call_manager)
-    option.add_command(label ="志愿管理",command=call_volunteer)
-form.config(menu=option)
+    frm=Frame(form) # 页面框架
+    option=Menu(form) # 菜单栏
+    user_pic=tkinter.PhotoImage(file="user.gif") # 用户照片
+    option.add_command(label ="个人信息",command=call_info)
+    if(user_data[0]!=3):
+        option.add_command(label ="订票服务",command=call_ticket)
+        option.add_command(label ="购买商品",command=call_item)
+    else:
+        option.add_command(label ="商品管理",command=call_manager)
+        option.add_command(label ="志愿管理",command=call_volunteer)
+    form.config(menu=option)
 
-call_info()
+    call_info()
 
 
-form.mainloop()
-    
-# m_heads=[('课程号','课程名','学分','学时','先修要求'),(0,100,300,400,550,700)] # 表头及列宽
+    form.mainloop()
+        
+    # m_heads=[('课程号','课程名','学分','学时','先修要求'),(0,100,300,400,550,700)] # 表头及列宽
 
-# m_frm=Frame(form)
-# m_table=main_table(m_frm,15,m_heads)
-# m_table.chart.bind('<Double-1>',m_table.change_data)
+    # m_frm=Frame(form)
+    # m_table=main_table(m_frm,15,m_heads)
+    # m_table.chart.bind('<Double-1>',m_table.change_data)
 
-# # 组件定位
-# m_table.chart.grid(row=0,column=0,columnspan=12,pady=12)
-# m_table.ybar.grid(row=0,column=12,sticky='ns',pady=12)
-# Button(m_frm,text="获取",width=6,font=('Arial',12),command=lambda:m_table.search_data(0)).grid(row=1,column=1)
-# Button(m_frm,text="详情",width=6,font=('Arial',12),command=lambda:detail_info(m_table.chart)).grid(row=1,column=2)
-# Button(m_frm,text="新建",width=6,font=('Arial',12),command=lambda:add_info(m_table)).grid(row=1,column=5)
-# Button(m_frm,text="删除",width=6,font=('Arial',12),command=lambda:m_table.delete_data(delete)).grid(row=1,column=6)
-# # Button(m_frm,text="导出",width=6,font=('Arial',12),command=export_info).grid(row=1,column=7)
-# # Button(m_frm,text="打印",width=6,font=('Arial',12),command=print_info).grid(row=1,column=8)
-# Button(m_frm,text="保存",width=6,font=('Arial',12),command=save_all).grid(row=1,column=9)
-# Button(m_frm,text="退出",width=6,font=('Arial',12),command=exit_all).grid(row=1,column=10)
-# m_frm.pack(pady=10)
-# form.mainloop()
+    # # 组件定位
+    # m_table.chart.grid(row=0,column=0,columnspan=12,pady=12)
+    # m_table.ybar.grid(row=0,column=12,sticky='ns',pady=12)
+    # Button(m_frm,text="获取",width=6,font=('Arial',12),command=lambda:m_table.search_data(0)).grid(row=1,column=1)
+    # Button(m_frm,text="详情",width=6,font=('Arial',12),command=lambda:detail_info(m_table.chart)).grid(row=1,column=2)
+    # Button(m_frm,text="新建",width=6,font=('Arial',12),command=lambda:add_info(m_table)).grid(row=1,column=5)
+    # Button(m_frm,text="删除",width=6,font=('Arial',12),command=lambda:m_table.delete_data(delete)).grid(row=1,column=6)
+    # # Button(m_frm,text="导出",width=6,font=('Arial',12),command=export_info).grid(row=1,column=7)
+    # # Button(m_frm,text="打印",width=6,font=('Arial',12),command=print_info).grid(row=1,column=8)
+    # Button(m_frm,text="保存",width=6,font=('Arial',12),command=save_all).grid(row=1,column=9)
+    # Button(m_frm,text="退出",width=6,font=('Arial',12),command=exit_all).grid(row=1,column=10)
+    # m_frm.pack(pady=10)
+    # form.mainloop()
 
 finish(flag) # 结束数据库连接

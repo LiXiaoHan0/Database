@@ -1,8 +1,8 @@
 from tkinter.constants import FALSE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
-import os
-os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
+# import os
+# os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 
 
 # ------------------------ 通用函数 ----------------------
@@ -94,11 +94,11 @@ def sign_in(name, age, sex, password, confirm):      #提交注册（return 根�
 
 
 #----------------------------操作部分-----------------------------------
-def search(t, *arg):
-    # t == 0 赛事门票查询
-    # t == 1 商品查询
+# def search(t, *arg):
+#     # t == 0 赛事门票查询
+#     # t == 1 商品查询
 
 
 
-def update(t, *arg):
-    # t == 0 志愿者服务批准
+# def update(t, *arg):
+#     # t == 0 志愿者服务批准
