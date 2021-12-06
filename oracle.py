@@ -1,4 +1,4 @@
-from tkinter.constants import FALSE
+from tkinter.constants import CHAR, FALSE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
 import os
@@ -83,26 +83,50 @@ def check(account, password):    #登录检验
             else:
                 #是visitor_volunteer
                 (account, state, assign) = cursor.fetchone()
-                res.append((state, account, assign))
-                return res
+                if (state == 0 or state == 1):
+                    res.append(state, account)
+                    return res
+                else:
+                    cursor.execute("select detail, venue from assign where ano = '%s'" %assign)
+                    (detail, vno) = cursor.fetchone()
+                    cursor.execute("select vname from venue where vno = '%s'" %vno)
+                    vname = cursor.fetchone()
+                    res.append((state, account, assign, detail, vname))
+                    return res
     except oracle.DatabaseError as e:
         msg('err', '错误', str(e))
 
 
 def sign_in(name, age, sex, password, confirm):      #提交注册（return 根据main函数需求更改，更改完后可以删去本注释）
-    if (password != confirm):
+    if (len(name) == 0 or len(name) >= 19):
+        msg('err', '错误', '请输入长度符合要求的姓名！')
+        return False
+    elif (age == '' or age <= 0 or age >= 100):
+        msg('err', '错误', '请输入正常范围的年龄！')
+        return False
+    elif (len(password) == 0 or len(password) >= 19):
+        msg('err', '错误', '请输入长度符合要求的密码！')
+        return False
+    elif (password != confirm):
         msg('err', '错误', '两次输入密码不一致！')
-        # return (FALSE, 2) 
+        return False
     else:
         try:
+            default_account = '20210000'
+            cursor.execute("select * from users")
+            if (cursor.fetchall() == None):
+                account = default_account
+            else:
+                cursor.execute("select max(account) from users")
+                account = str(int(cursor.fetchone()) + 1)
             #设置一个默认初始值，空表插入用默认值作为账号，其他则用此账号依次加一
-            cursor.execute("insert into users values('%s', %d, '%s', '%s', '%s')" %(name, age, sex, password, confirm))
+            cursor.execute("insert into users values('%s', %d, '%s', '%s', '%s')" %(name, age, sex, account, password))
             commit()
             msg('inf','提示','注册成功！')
-            # return (True,)
+            return True
         except oracle.DatabaseError as e:
             msg('err','错误',str(e))
-            # return (False,0)
+            return False
 
 
 #----------------------------操作部分-----------------------------------
@@ -111,11 +135,11 @@ def search(t, *arg):
     # t == 1 商品查询
     # t == 2 用户信息查询
     if (t == 2):
-        try:
+        #try:
             user_data = []
             cursor.execute("select * from users where account='%s' and password='%s'")
 
 
 
-def update(t, *arg):
+#def update(t, *arg):
     # t == 0 志愿者服务批准
