@@ -4,8 +4,8 @@ from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-power=0 # 权限等级
-alter=0 # 是否修改
+user_data=0 # 用户信息
+
 root=Tk() # 根窗口
 screen_x=root.winfo_screenwidth() # 屏幕宽度
 screen_y=root.winfo_screenheight() # 屏幕高度
@@ -14,9 +14,8 @@ screen_y=root.winfo_screenheight() # 屏幕高度
 
 class subform: # 输入框界面
 
-    def __init__(self,father,title,que,submit): # 父容器，标题，标签及默认值
+    def __init__(self,father,title,que): # 父容器，标题，标签及默认值
         l=len(que)
-        self.submit_data=submit
 
         form=Toplevel(father)
         form.title(title)
@@ -24,38 +23,54 @@ class subform: # 输入框界面
         form.resizable(width=False, height=False)
 
         frm=Frame(form)
-        str_v=[StringVar() for i in range(l)]
-        str_e=[Entry(frm,fg='#A9A9A9',textvariable=str_v[i]) for i in range(l)]
-        bool_e=[True for i in range(l)]
-        
+        str_v=[StringVar(frm) for i in range(l)]
+        str_e=[] # 输入框
+        str_l=[] # 下拉框
+        for i,e in enumerate(que):
+            if(e[2]==0):
+                str_e.append([Entry(frm,fg='#A9A9A9',textvariable=str_v[i]),i])
+            else:
+                str_l.append([ttk.Combobox(frm,values=e[3],textvariable=str_v[i],width=17,state="readonly"),i])
+        e_l=len(str_e)
+        bool_e=[True for i in range(e_l)]
+
         self.flag=bool_e
         self.form=form
         self.edit=str_e
+        self.list=str_l
 
-        def press_key(event,index):
-            if(event.keycode==38): self.first_edit(event,(index-1)%l)
-            elif(event.keycode==40): self.first_edit(event,(index+1)%l)
+        def press_key(event,index): # 上下键绑定
+            if(event.keycode==38): self.first_edit(event,(index-1)%e_l)
+            elif(event.keycode==40): self.first_edit(event,(index+1)%e_l)
         
         for i,txt in enumerate(que):
             Label(frm,text=txt[0],font=('SimHei',12)).grid(row=i, column=0,columnspan=2)
         for i,e in enumerate(str_e):
-            e.insert(0,que[i][1]) # 默认值
-            e.bind('<Button-1>',lambda event,_i=i:self.first_edit(event,_i)) # 初次编辑判定
-            e.bind('<Return>',self.submit_data) # 绑定回车键
-            e.bind('<Key>',lambda event,_i=i:press_key(event,_i+l)) # 绑定上下键
-            e.grid(row=i,column=3,padx=5,pady=10,columnspan=4)
+            e[0].insert(0,que[e[1]][1]) # 默认值
+            e[0].bind('<Button-1>',lambda event,_i=i:self.first_edit(event,_i)) # 初次编辑判定
+            e[0].bind('<Return>',self.submit_data) # 绑定回车键
+            e[0].bind('<Key>',lambda event,_i=i:press_key(event,_i+e_l)) # 绑定上下键
+            e[0].grid(row=e[1],column=3,padx=5,pady=10,columnspan=4)
+        for e in str_l:
+            e[0].bind('<Return>',self.submit_data) # 绑定回车键
+            e[0].grid(row=e[1],column=3,padx=5,pady=10,columnspan=4) # 默认值
         Button(frm,width=8,text="退出",font=('SimHei',12),command=self.exit_form).grid(row=l,column=1,pady=10,columnspan=2)
         Button(frm,width=8,text="提交",font=('SimHei',12),command=self.submit_data).grid(row=l,column=5,pady=10)
 
         frm.pack()
         form.mainloop()
 
+    def get_data(self,*event):
+        self.vars=[i[0].get() for i in self.edit]
+        for i in self.list:
+            self.vars.append(i[0].get())
+
     def first_edit(self,event,index):
         if(self.flag[index]):
-            self.edit[index].config(fg='#000000')
-            self.edit[index].delete(0,END)
+            self.edit[index][0].config(fg='#000000')
+            self.edit[index][0].delete(0,END)
             self.flag[index]=False
-        if(not self.edit[index].select_present()): self.edit[index].focus_set()
+        if(not self.edit[index][0].select_present()): self.edit[index][0].focus_set()
 
     def exit_form(self):
         self.form.destroy()
@@ -63,11 +78,10 @@ class subform: # 输入框界面
 
 class table: # 自定义表格
 
-    def __init__(self,father,num,heads,search,modify=False): # 初始化
+    def __init__(self,father,num,heads,search): # 初始化
         self.data=[]
         self.far=father
         self.heads=heads
-        self.modify=modify
         self.search=search
         self.ybar=Scrollbar(father,orient='vertical')
         self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set)
@@ -106,25 +120,24 @@ class table: # 自定义表格
         print(val,cn,rn,col,row)
 
     def change_data(self,event): # 修改数据
-        if(self.modify):
-            tmp=self.chart
-            col= tmp.identify_column(event.x) # 列节点
-            row = tmp.identify_row(event.y) # 行节点
-            cn=int(str(col).replace('#','')) # 获取列数
-            rn=(event.y-6)//20 # 获取行数
+        tmp=self.chart
+        col= tmp.identify_column(event.x) # 列节点
+        row = tmp.identify_row(event.y) # 行节点
+        cn=int(str(col).replace('#','')) # 获取列数
+        rn=(event.y-6)//20 # 获取行数
 
-            def finish_edit(event):
-                if(edit.get()!=''):
-                    self.save_change(edit.get(),cn,rn,col,row)
-                edit.destroy()
+        def finish_edit(event):
+            if(edit.get()!=''):
+                self.save_change(edit.get(),cn,rn,col,row)
+            edit.destroy()
 
-            if(len(self.data)>=rn and rn>0):
-                Str_v=StringVar()
-                edit=Entry(self.far,width=(self.heads[1][cn]-self.heads[1][cn-1])//8,textvariable=Str_v)
-                edit.focus_set()
-                edit.bind('<FocusOut>',finish_edit)
-                # edit.bind('<Return>',self.save_change)
-                edit.place(x=self.heads[1][cn-1]*15//16+self.heads[1][cn]//16,y=rn*20+16)
+        if(len(self.data)>=rn and rn>0):
+            Str_v=StringVar()
+            edit=Entry(self.far,width=(self.heads[1][cn]-self.heads[1][cn-1])//8,textvariable=Str_v)
+            edit.focus_set()
+            edit.bind('<FocusOut>',finish_edit)
+            # edit.bind('<Return>',self.save_change)
+            edit.place(x=self.heads[1][cn-1]*15//16+self.heads[1][cn]//16,y=rn*20+16)
 
     def export_info(): # 导出数据
         pass
@@ -137,44 +150,34 @@ class table: # 自定义表格
 # ------------------------ 登录界面函数 ----------------------------
 
 def check_login(*arg): # 登录检验
-    pass
-    # global power
-    # power=login_check(l_e1.get(),l_e2.get())
-    # if(power!=0): login.destroy()
+    print(l_e1.get(),l_e2.get()) # 所需数据
+    global user_data
+    user_data=[0,'1','李晗','男','19岁'] # 示例
+    # !!! 需要返回用户信息，第一个是权限、第二个是账号
+    # -1:账号不存在或密码错误
+    # 0:未申请为志愿者；
+    # 1:申请成为志愿者；
+    # 2:已经成为志愿者；
+    # 3:管理员
+    if(user_data[0]!=-1): login.destroy()
 
 
 def sign_in(): # 注册界面
 
     class sign_subform(subform): # 继承
 
-        def submit_data(self,*event):
-            pass
-            # edits=[self.edit[i].get() for i in range(3)]
+        def submit_data(self,*event): # 提交数据
+            self.get_data() # 刷新数据
+            print(self.vars) # !!!
 
-            # if(inspect('' if self.flag[0] else edits[0],'str',0,1,15)): 
-            #     self.first_edit(event,0)
-            #     return
-            # if(inspect('' if self.flag[1] else edits[1],'str',0,5,15)): 
-            #     self.first_edit(event,1)
-            #     return
-            # if(inspect('' if self.flag[2] else edits[2],'str',0,5,15)): 
-            #     self.first_edit(event,2)
-            #     return
-
-            # ans=signin(edits[0],edits[1],edits[2])
-            # if(ans[0]):
-            #     self.form.destroy()
-            # else:
-            #     self.edit[ans[1]].focus_set()
-
-    sign_subform(login,'新用户注册',[('姓名：','请输入您的姓名'),('年龄：','请输入您的年龄'),('性别：','男/女'),('密码：','请设置登录密码'),('确认密码：','请再次输入密码')])
+    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置登录密码',0),('确认密码：','请再次输入密码',0)])
 
 
 # ------------------------- 登录界面布局 -----------------------------
 
 login=root
-login.title("北京冬奥会信息管理系统")
-login.geometry("450x250+"+str((screen_x-360)//2)+"+"+str((screen_y-200)//2))
+login.title("北京冬奥会信息管理系统：登录界面")
+login.geometry("450x250+"+str((screen_x-450)//2)+"+"+str((screen_y-250)//2))
 login.resizable(width=False, height=False)
 
 l_frm=Frame(login)
@@ -213,3 +216,92 @@ l_frm.pack(padx=20,pady=20)
 flag=connect() # 连接数据库
 if(flag):login.mainloop()
 
+
+# ------------------------- 操作界面函数 -----------------------------
+
+def clear(): # 清除页面布局
+    global frm
+    frm.destroy()
+
+
+# ------------------------- 操作界面子布局 -----------------------------
+
+def call_info(): # 个人信息页面
+    clear()
+    info_frm=Frame(form)
+    global frm
+    frm=info_frm
+
+    Label(info_frm,width=160,height=160,image=user_pic).grid(row=1,column=0,rowspan=3,padx=50,pady=10)
+    for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
+        Label(info_frm,text=txt,font=('SimHei',20)).grid(row=i,column=1,pady=10)
+        Label(info_frm,text=user_data[i+1],font=('SimHei',20)).grid(row=i,column=2,pady=10)
+    Label(info_frm,text="您的身份是："+"",font=('SimHei',20)).grid(row=4,column=0,columnspan=2,pady=50)
+    info_frm.pack(padx=20,pady=20)
+
+
+def call_ticket(): # 票务页面
+    clear()
+    pass
+
+
+def call_item(): # 商品页面
+    clear()
+    pass
+
+
+def call_manager(): # 商品管理页面
+    clear()
+    pass
+
+
+def call_volunteer(): # 志愿管理页面
+    clear()
+    pass
+
+
+# ------------------------- 操作界面主布局 -----------------------------
+
+form=Tk()
+form.title("北京冬奥会信息管理系统：操作界面")
+form.geometry("650x400"+"+"+str((screen_x-650)//2)+"+"+str((screen_y-400)//2))
+form.resizable(width=False, height=False)
+
+frm=Frame(form) # 页面框架
+option=Menu(form) # 菜单栏
+user_pic=tkinter.PhotoImage(file="user.gif") # 用户照片
+option.add_command(label ="个人信息",command=call_info)
+if(user_data[0]!=3):
+    option.add_command(label ="订票服务",command=call_ticket)
+    option.add_command(label ="购买商品",command=call_item)
+else:
+    option.add_command(label ="商品管理",command=call_manager)
+    option.add_command(label ="志愿管理",command=call_volunteer)
+form.config(menu=option)
+
+call_info()
+
+
+form.mainloop()
+    
+# m_heads=[('课程号','课程名','学分','学时','先修要求'),(0,100,300,400,550,700)] # 表头及列宽
+
+# m_frm=Frame(form)
+# m_table=main_table(m_frm,15,m_heads)
+# m_table.chart.bind('<Double-1>',m_table.change_data)
+
+# # 组件定位
+# m_table.chart.grid(row=0,column=0,columnspan=12,pady=12)
+# m_table.ybar.grid(row=0,column=12,sticky='ns',pady=12)
+# Button(m_frm,text="获取",width=6,font=('Arial',12),command=lambda:m_table.search_data(0)).grid(row=1,column=1)
+# Button(m_frm,text="详情",width=6,font=('Arial',12),command=lambda:detail_info(m_table.chart)).grid(row=1,column=2)
+# Button(m_frm,text="新建",width=6,font=('Arial',12),command=lambda:add_info(m_table)).grid(row=1,column=5)
+# Button(m_frm,text="删除",width=6,font=('Arial',12),command=lambda:m_table.delete_data(delete)).grid(row=1,column=6)
+# # Button(m_frm,text="导出",width=6,font=('Arial',12),command=export_info).grid(row=1,column=7)
+# # Button(m_frm,text="打印",width=6,font=('Arial',12),command=print_info).grid(row=1,column=8)
+# Button(m_frm,text="保存",width=6,font=('Arial',12),command=save_all).grid(row=1,column=9)
+# Button(m_frm,text="退出",width=6,font=('Arial',12),command=exit_all).grid(row=1,column=10)
+# m_frm.pack(pady=10)
+# form.mainloop()
+
+finish(flag) # 结束数据库连接
