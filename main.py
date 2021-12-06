@@ -163,14 +163,15 @@ def check_login(*arg): # 登录检验
     if(user_data[0]!=-1): login.destroy()
 
 
-def sign_in(): # 注册界面
+def sign_data(): # 注册界面
 
     class sign_subform(subform): # 继承
 
         def submit_data(self,*event): # 提交数据
             self.get_data() # 刷新数据
-            print(self.vars) # !!!
-
+            if(sign_in(self.vars[0],self.vars[1],self.vars[2],self.vars[3],self.vars[4])):
+                self.exit_form()
+                
     sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置20以内密码',0),('确认密码：','请再次输入密码',0)])
 
 
@@ -208,7 +209,7 @@ l_e2.bind('<Key>',lambda event:e_press_key(event,2))
 l_e1.grid(row=1,column=4,padx=5,pady=10,columnspan=3)
 l_e2.grid(row=2,column=4,padx=5,pady=10,columnspan=3)
 Button(l_frm,text="登录",width=6,font=('SimHei',15),command=check_login).grid(row=3,column=2,columnspan=3,pady=15,padx=5)
-Button(l_frm,text="注册",width=6,font=('SimHei',15),command=sign_in).grid(row=3,column=5,columnspan=2,pady=15,padx=5)
+Button(l_frm,text="注册",width=6,font=('SimHei',15),command=sign_data).grid(row=3,column=5,columnspan=2,pady=15,padx=5)
 l_frm.pack(padx=20,pady=20)
 
 # 设置程序图标
