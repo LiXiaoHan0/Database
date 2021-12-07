@@ -136,5 +136,8 @@ def sign_in(name, age, sex, password, confirm):      #提交注册（return 根�
 
 
 
-# def update(t, *arg):
-#     # t == 0 志愿者服务批准
+#def update(t, *arg):
+    # t == 0 志愿者服务批准
+
+
+    #test
