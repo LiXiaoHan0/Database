@@ -151,9 +151,10 @@ class table: # 自定义表格
 # ------------------------ 登录界面函数 ----------------------------
 
 def check_login(*arg): # 登录检验
-    print(l_e1.get(),l_e2.get()) # 所需数据
     global user_data
-    user_data=(2,'3','李晗','男','19岁',('冰立方','制冰')) # 示例
+    user_data = check(l_e1.get(), l_e2.get())
+    print(l_e1.get(),l_e2.get()) # 所需数据
+    #user_data=(2,'3','李晗','男','19岁',('冰立方','制冰')) # 示例
     # !!! 需要返回用户信息，第一个是权限、第二个是账号
     # -1:账号不存在或密码错误
     # 0:未申请为志愿者；
@@ -178,7 +179,7 @@ def sign_data(): # 注册界面
 # ------------------------- 登录界面布局 -----------------------------
 
 login=root
-login.title("北京冬奥会信息管理系统：登录界面")
+login.title("北京冬奥会信息管理系统：登录界面")            #账号输入框可以加一句提示：请输入8位数字账号
 login.geometry("450x250+"+str((screen_x-450)//2)+"+"+str((screen_y-250)//2))
 login.resizable(width=False, height=False)
 
@@ -192,7 +193,7 @@ pic=tkinter.PhotoImage(file="dream.gif")
 Label(l_frm,width=150,height=180,image=pic).grid(row=1,column=0,columnspan=2,rowspan=3,padx=5,pady=10)
 Label(l_frm, text='账号：',font=('SimHei',15)).grid(row=1, column=2,columnspan=2)
 Label(l_frm, text='密码：',font=('SimHei',15)).grid(row=2, column=2,columnspan=2)
-l_e1=Entry(l_frm,font=('SimHei',15),width=15,textvariable=l_v1)
+l_e1=Entry(l_frm, font=('SimHei',15),width=15,textvariable=l_v1)
 l_e2=Entry(l_frm,font=('SimHei',15),width=15,textvariable=l_v2,show='*')
 
 # 绑定回车键&上下键

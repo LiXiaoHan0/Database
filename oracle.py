@@ -1,8 +1,8 @@
 from tkinter.constants import CHAR, FALSE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
-# import os
-# os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
+import os
+os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 
 
 # ------------------------ 通用函数 ----------------------
@@ -65,36 +65,40 @@ def finish(flag): # 关闭连接
 
 
 def check(account, password):    #登录检验
-    try:
-        cursor.execute("select * from users where account = '%s' and password = '%s'" %(account,password))
-        res = cursor.fetchone()
-        if (res == None):
-            msg('err', '错误', '账号不存在或密码错误！')
-            return -1
-        else:
-            res = []
-            cursor.execute("select account, state, assign from visitor_volunteer where account = '%s'" %account)
-            if (cursor.fetchone() == None):
-                #是管理员
-                cursor.execute("select * from admin where account = '%s'" %account)
-                account = cursor.fetchone()
-                res.append((3, account))
-                return res
+    res = (inspect(account, 'int', 8))
+    if (res == True):
+        return -1
+    else:
+        try:
+            cursor.execute("select * from users where account = '%s' and password = '%s'" %(account,password))
+            res = cursor.fetchone()
+            if (res == None):
+                msg('err', '错误', '账号不存在或密码错误！')
+                return -1
             else:
-                #是visitor_volunteer
-                (account, state, assign) = cursor.fetchone()
-                if (state == 0 or state == 1):
-                    res.append(state, account)
+                res = []
+                cursor.execute("select account, state, assign from visitor_volunteer where account = '%s'" %account)
+                if (cursor.fetchone() == None):
+                    #是管理员
+                    cursor.execute("select * from admin where account = '%s'" %account)
+                    account = cursor.fetchone()
+                    res = [3, account]
                     return res
                 else:
-                    cursor.execute("select detail, venue from assign where ano = '%s'" %assign)
-                    (detail, vno) = cursor.fetchone()
-                    cursor.execute("select vname from venue where vno = '%s'" %vno)
-                    vname = cursor.fetchone()
-                    res.append((state, account, assign, detail, vname))
-                    return res
-    except oracle.DatabaseError as e:
-        msg('err', '错误', str(e))
+                    #是visitor_volunteer
+                    (account, state, assign) = cursor.fetchone()
+                    if (state == 0 or state == 1):
+                        res = [state, account]
+                        return res
+                    else:
+                        cursor.execute("select detail, venue from assign where ano = '%s'" %assign)
+                        (detail, vno) = cursor.fetchone()
+                        cursor.execute("select vname from venue where vno = '%s'" %vno)
+                        vname = cursor.fetchone()
+                        res = [state, account, assign, detail, vname]
+                        return res
+        except oracle.DatabaseError as e:
+            msg('err', '错误', str(e))
 
 
 def sign_in(name, age, sex, password, confirm):      #提交注册（return 根据main函数需求更改，更改完后可以删去本注释）
