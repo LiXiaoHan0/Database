@@ -1,5 +1,4 @@
 from tkinter import *
-from types import BuiltinFunctionType
 from oracle import *
 from tkinter import ttk # 树状表格
 
@@ -79,13 +78,13 @@ class subform: # 输入框界面
 
 class table: # 自定义表格
 
-    def __init__(self,father,num,heads,position,method): # 初始化
+    def __init__(self,father,num,heads,method): # 初始化
         self.data=[]
         self.far=father
         self.heads=heads
         self.search=method
         self.ybar=Scrollbar(father,orient='vertical')
-        self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set).grid(row=position[0],column=position[1],rowspan=position[2],columnspan=position[3],pady=position[4],padx=position[5])
+        self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set)
         self.ybar['command']=self.chart.yview
         for i,val in enumerate(heads[0]): # 设置表头
             self.chart.column(val,width=heads[1][i+1]-heads[1][i],anchor="center")
@@ -241,7 +240,18 @@ def show_volunteer(): # 查看志愿任务分配
 
 # ------- 订票业务页面 --------
 
+def ticket_data(*event): # 获取票务信息
+    # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）'，例如：
+    return (('跳台滑雪','2月25日09:00-10:00','20','100'),('高山滑雪','2月26日19:00-20:00','50','80'))
+    
+def select_data(*event): # 选择票务信息
+    pass
 
+def finish_data(*event): # 开始结账
+    pass
+
+def history_data(*event): # 查看历史信息
+    pass
 
 
 # ------------------------- 操作界面子布局 -----------------------------
@@ -250,38 +260,46 @@ def call_info(): # 个人信息页面
     clear()
     global frm
     frm=Frame(form)
+    form.geometry("480x280")
     power=['群众','群众','志愿者','管理员']
 
     # form.geometry("600x300")
-    Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=60)
+    Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=40)
     for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
-        Label(frm,text=txt+user_data[i+1],font=('SimHei',20),width=20,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)
-    Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=30)
+        Label(frm,text=txt+user_data[i+1],font=('SimHei',20),width=12,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)
+    Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=20)
     if(user_data[0]==0):
-        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',16),command=apply_volunteer).grid(row=4,column=1,columnspan=2,pady=30,padx=20)
+        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',15),command=apply_volunteer).grid(row=4,column=1,columnspan=2,pady=20)
     elif(user_data[0]==1):
-        Label(frm,text="志愿申请已提交",font=('SimHei',16)).grid(row=4,column=1,columnspan=2,pady=30,padx=20)
+        Label(frm,text="志愿申请已提交",font=('SimHei',15)).grid(row=4,column=1,columnspan=2,pady=20)
     elif(user_data[0]==2):
-        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',16),command=show_volunteer).grid(row=4,column=1,columnspan=2,pady=30,padx=20)
-        
+        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',15),command=show_volunteer).grid(row=4,column=1,columnspan=2,pady=20)  
     frm.pack(padx=20,pady=20)
 
 
 def call_ticket(): # 票务页面
     clear()
+    sum=0 # 总金额
     global frm
     frm=Frame(form)
-    heads1=[('比赛项目','比赛时间','门票剩余','门票价格（元）'),(0,80,180,250,320)]
-    heads2=[('比赛项目','购票数量','单项价格（元）'),(0,80,180,230,280)]
+    form.geometry("720x350")
+    heads1=[('比赛项目','比赛时间','门票剩余','门票价格'),(0,80,280,340,400)]
+    heads2=[('比赛项目','购票数量','单项价格'),(0,80,160,240)]
+    t_table1=table(frm,12,heads1,ticket_data)
+    t_table2=table(frm,6,heads2,lambda:())
 
-    
-    Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0,pady=30,padx=50)
-    Label(frm,text="已选门票",font=('SimHei',16)).grid(row=0,column=0,pady=30,padx=50)
-    table(frm,12,heads1,(1,0,5,1,20,20),clear)
-    table(frm,6,heads2,(1,0,1,1,20,20),clear)
-    Label(frm,text="合计金额：0",font=('SimHei',16)).grid(row=0,column=0,pady=30,padx=50)
-    
-    
+    t_table1.chart.grid(row=1,column=0,rowspan=4,pady=5)
+    t_table1.ybar.grid(row=1,column=1,rowspan=4,sticky='ns',pady=5)
+    t_table2.chart.grid(row=1,column=2,columnspan=2,pady=10)
+    t_table2.ybar.grid(row=1,column=4,sticky='ns',pady=10)
+    Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0)
+    Label(frm,text="已选门票",font=('SimHei',16)).grid(row=0,columnspan=3,column=2)
+    Label(frm,text="合计金额："+str(sum),font=('SimHei',16)).grid(row=2,column=2,columnspan=3,pady=8)
+    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=t_table1.search_data).grid(row=3,column=2,pady=5,padx=15)
+    Button(frm,text="确认购票信息",width=12,font=('SimHei',12),command=finish_data).grid(row=3,column=3,pady=5,padx=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=select_data).grid(row=4,column=2,pady=5,padx=15)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=history_data).grid(row=4,column=3,pady=5,padx=5)
+    frm.pack(padx=20,pady=20)
 
 
 def call_item(): # 商品页面
@@ -304,7 +322,7 @@ def call_volunteer(): # 志愿管理页面
 if(user_data[0]>=0):
     form=Tk()
     form.title("北京冬奥会信息管理系统：操作界面")
-    form.geometry("600x300"+"+"+str((screen_x-600)//2)+"+"+str((screen_y-300)//2))
+    form.geometry("480x280"+"+"+str((screen_x-560)//2)+"+"+str((screen_y-300)//2))
     form.resizable(width=False, height=False)
 
     frm=Frame(form) # 页面框架
