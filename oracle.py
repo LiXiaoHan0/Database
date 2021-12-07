@@ -76,26 +76,26 @@ def check(account, password):    #登录检验
                 msg('err', '错误', '账号不存在或密码错误！')
                 return -1
             else:
+                (name, age, sex, account, password) = res
                 res = []
-                cursor.execute("select account, state, assign from visitor_volunteer where account = '%s'" %account)
-                if (cursor.fetchone() == None):
+                cursor.execute("select state, assign from visitor_volunteer where account = '%s'" %account)
+                tmp = cursor.fetchone()
+                if (tmp == None):
                     #是管理员
-                    cursor.execute("select * from admin where account = '%s'" %account)
-                    account = cursor.fetchone()
-                    res = [3, account]
+                    res = [3, account, name, sex, age]
                     return res
                 else:
                     #是visitor_volunteer
-                    (account, state, assign) = cursor.fetchone()
+                    (state, assign) = tmp
                     if (state == 0 or state == 1):
-                        res = [state, account]
+                        res = [state, account, name, sex, age]
                         return res
                     else:
                         cursor.execute("select detail, venue from assign where ano = '%s'" %assign)
                         (detail, vno) = cursor.fetchone()
                         cursor.execute("select vname from venue where vno = '%s'" %vno)
-                        vname = cursor.fetchone()
-                        res = [state, account, assign, detail, vname]
+                        (vname,) = cursor.fetchone()   #保证返回正确形式的(vname, detail)元组
+                        res = [state, account, name, sex, age, (vname, detail)]
                         return res
         except oracle.DatabaseError as e:
             msg('err', '错误', str(e))
