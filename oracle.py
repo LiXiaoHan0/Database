@@ -134,14 +134,39 @@ def sign_in(name, age, sex, password, confirm):      #提交注册（return 根�
 
 
 #----------------------------操作部分-----------------------------------
-# def search(t, *arg):
-#     # t == 0 赛事门票查询
-#     # t == 1 商品查询
+def volunteer_approval_list(*arg):                  #点击管理员选项中的“志愿管理”和刷新都可以进入这一选项
+    try:
+        cursor.execute("select account from visitor_volunteer where state = 1")
+        res = cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
 
+def approve_volunteer(account):                     #审批同意，可以在点击“同意”按钮时调用
+    try:
+        cursor.execute("update visitor_volunteer set state = 2 where account = '%s'" %account)
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
+        
+def volunteer_list(*arg):                            #获取所有已经是志愿者的人的信息
+    try:
+        cursor.execute("select account from visitor_volunteer where state = 2")
+        res = cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
 
-
-#def update(t, *arg):
-    # t == 0 志愿者服务批准
+def allocate_assignment(account, ANo):                #给志愿者分配任务
+    try:
+        cursor.execute("update visitor_volunteer set assign = '%s' where account = '%s'" %(ANo, account))
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
 
 
     #test
