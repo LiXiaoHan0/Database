@@ -145,6 +145,20 @@ class table: # 自定义表格
     def print_info(): # 打印数据
         pass
 
+class order: # 自定义数量单
+
+    def __init__(self,father,title,que,method):
+        l=len(que)
+        self.search=method
+
+        form=Toplevel(father)
+        form.title(title)
+        form.geometry("300x"+str(45*(l+1))+"+"+str((screen_x-300)//2)+"+"+str((screen_y-45*(l+1))//2))
+        form.resizable(width=False, height=False)
+
+        frm=Frame(form)
+
+        
 
 
 # ------------------------ 登录界面函数 ----------------------------
