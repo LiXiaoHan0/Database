@@ -201,7 +201,7 @@ l_v1=StringVar()
 l_v2=StringVar()
 
 import tkinter # 引入图片
-pic=tkinter.PhotoImage(file="dream.gif")
+pic=tkinter.PhotoImage(file="figures/dream.gif")
 
 Label(l_frm,width=150,height=180,image=pic).grid(row=1,column=0,columnspan=2,rowspan=3,padx=5,pady=10)
 Label(l_frm, text='账号：',font=('SimHei',15)).grid(row=1, column=2,columnspan=2)
@@ -281,7 +281,7 @@ def call_info(): # 个人信息页面
     # form.geometry("600x300")
     Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=40)
     for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
-        Label(frm,text=txt+user_data[i+1],font=('SimHei',20),width=12,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)          #这一行报错
+        Label(frm,text=txt + str(user_data[i+1]),font=('SimHei',16),width=16,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)          
     Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=20)
     if(user_data[0]==0):
         Button(frm,text="申请成为志愿者",width=16,font=('SimHei',15),command=apply_volunteer).grid(row=4,column=1,columnspan=2,pady=20)
@@ -342,7 +342,7 @@ if(user_data[0]>=0):
 
     frm=Frame(form) # 页面框架
     option=Menu(form) # 菜单栏
-    user_pic=tkinter.PhotoImage(file="user.gif") # 用户照片
+    user_pic=tkinter.PhotoImage(file="figures/user.gif") # 用户照片
     option.add_command(label ="个人信息",command=call_info)
     if(user_data[0]!=3):
         option.add_command(label ="订票服务",command=call_ticket)
@@ -353,7 +353,7 @@ if(user_data[0]>=0):
     form.config(menu=option)
 
     call_info()
-
+    # print(approve_volunteer()[0]=='11111111')
 
     form.mainloop()
         
