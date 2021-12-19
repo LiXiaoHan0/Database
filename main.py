@@ -4,7 +4,7 @@ from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-user_data=(0,'0','无',0,('无','无')) # 用户信息
+user_data=(-1,'0','无',0,('无','无')) # 用户信息
 
 root=Tk() # 根窗口
 screen_x=root.winfo_screenwidth() # 屏幕宽度
@@ -53,7 +53,7 @@ class subform: # 输入框界面
             e[0].grid(row=e[1],column=3,padx=5,pady=10,columnspan=4)
         for e in str_l:
             e[0].bind('<Return>',self.submit_data) # 绑定回车键
-            e[0].grid(row=e[1],column=3,padx=5,pady=10,columnspan=4) # 默认值
+            e[0].grid(row=e[1],column=3,padx=5,pady=10,columnspan=4) # 确定位置
         Button(frm,width=8,text="退出",font=('SimHei',12),command=self.exit_form).grid(row=l,column=1,pady=10,columnspan=2)
         Button(frm,width=8,text="提交",font=('SimHei',12),command=self.submit_data).grid(row=l,column=5,pady=10)
 
@@ -103,11 +103,8 @@ class table: # 自定义表格
         if(len(tmp.selection())==0):
             msg('err','提示','未选择任何数据！')
         else:
-            if(messagebox.askokcancel('提示', '相关信息也将被删除，确定要删除数据吗？')):
-                global alter
-                alter=1
-                method([tmp.set(k,"课程号") for k in tmp.selection()])
-                self.search_data(0)
+            # if(messagebox.askokcancel('提示', '相关信息也将被删除，确定要删除数据吗？')):
+            method([tmp.set(k,"课程号") for k in tmp.selection()])
 
     def search_data(self,*arg): # 获取数据
         for i in self.chart.get_children(''):
@@ -147,17 +144,37 @@ class table: # 自定义表格
 
 class order: # 自定义数量单
 
-    def __init__(self,father,title,que,method):
-        l=len(que)
-        self.search=method
-
+    def __init__(self,father,title,txt,number,method):
         form=Toplevel(father)
         form.title(title)
-        form.geometry("300x"+str(45*(l+1))+"+"+str((screen_x-300)//2)+"+"+str((screen_y-45*(l+1))//2))
+        form.geometry("300x"+str(45*(1+1)+20)+"+"+str((screen_x-300)//2)+"+"+str((screen_y-45*(1+1))//2))
         form.resizable(width=False, height=False)
 
         frm=Frame(form)
+        Label(frm,text=txt,font=('SimHei',12)).grid(row=0,column=0,columnspan=2)
+        str0=StringVar()
+        Button(frm,width=8,text="取消",font=('SimHei',12),command=self.exit_form).grid(row=1,column=1,pady=10)
+        Button(frm,width=8,text="确定",font=('SimHei',12),command=self.submit_data).grid(row=1,column=3,pady=10)
+        spin=ttk.Spinbox(frm,from_=1,to=number,increment=1,textvariable=str0,font=('SimHei',12),state="readonly")
+        spin.grid(row=0,column=2,columnspan=3,pady=15)
+        spin.bind('<Return>',self.submit_data) # 绑定回车键
+        frm.pack()
 
+        self.num=str0
+        self.form=form
+        self.method=method
+    
+    def exit_form(self):
+        self.form.destroy()
+
+    def submit_data(self,*event):
+        if(self.num.get()!=''):
+            self.form.destroy()
+            print(self.num.get())
+            self.method(self.num.get())
+        else:
+            msg('err','提示','未选择购票数量！')
+            self.form.focus_set()
         
 
 
@@ -165,10 +182,11 @@ class order: # 自定义数量单
 
 def check_login(*arg): # 登录检验
     global user_data
-    user_data = check(l_e1.get(), l_e2.get())
     print(l_e1.get(),l_e2.get()) # 所需数据
-    #user_data=(2,'3','李晗','男','19岁',('冰立方','制冰')) # 示例
-    # !!! 需要返回用户信息，第一个是权限、第二个是账号
+    tmp_data=check(l_e1.get(), l_e2.get())
+    if(tmp_data!=-1):
+        user_data=tmp_data
+    # user_data=(2,'3','李晗','男','19岁',('冰立方','制冰')) # 示例
     # -1:账号不存在或密码错误
     # 0:未申请为志愿者；
     # 1:申请成为志愿者；
@@ -183,10 +201,13 @@ def sign_data(): # 注册界面
 
         def submit_data(self,*event): # 提交数据
             self.get_data() # 刷新数据
-            if(sign_in(self.vars[0],self.vars[1],self.vars[2],self.vars[3],self.vars[4])):
+            print(self.vars[0],self.vars[1],self.vars[2],self.vars[3],self.vars[4])
+            if(sign_in(self.vars[0],self.vars[1],self.vars[4],self.vars[2],self.vars[3])):
                 self.exit_form()
-                
-    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置20以内密码',0),('确认密码：','请再次输入密码',0)])
+            else:
+                self.form.focus_set()
+
+    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置20字符以内密码',0),('确认密码：','请再次输入密码',0)])
 
 
 # ------------------------- 登录界面布局 -----------------------------
@@ -259,14 +280,25 @@ def ticket_data(*event): # 获取票务信息
     # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）'，例如：
     return (('跳台滑雪','2月25日09:00-10:00','20','100'),('高山滑雪','2月26日19:00-20:00','50','80'))
     
-def select_data(*event): # 选择票务信息
+def select_data(table): # 选择票务信息
+    if(len(table.chart.selection())==0):
+        msg('err','提示','未选择任何数据！')
+    elif(len(table.chart.selection())>1):
+        msg('err','提示','一次只能选择一条数据！')
+    elif(False):
+        msg('err','提示','该场次已没有余票！')
+    else:
+        def add_data(num):
+            print('购票数量为：'+str(num))
+        print(table.chart.selection())
+        order(frm,'选择购票数量','购票数量：',20,add_data)
+
+def finish_data(chart): # 开始结账
     pass
 
-def finish_data(*event): # 开始结账
-    pass
-
-def history_data(*event): # 查看历史信息
-    pass
+def history_data(): # 查看历史信息
+    print(user_data[1])
+    # !!! 给出用户账号，返回用户历史订单信息
 
 
 # ------------------------- 操作界面子布局 -----------------------------
@@ -309,11 +341,13 @@ def call_ticket(): # 票务页面
     t_table2.ybar.grid(row=1,column=4,sticky='ns',pady=10)
     Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0)
     Label(frm,text="已选门票",font=('SimHei',16)).grid(row=0,columnspan=3,column=2)
-    Label(frm,text="合计金额："+str(sum),font=('SimHei',16)).grid(row=2,column=2,columnspan=3,pady=8)
+    Label(frm,text="合计金额："+str(sum),font=('SimHei',12)).grid(row=2,column=2,pady=8)
+    Button(frm,text="清空订单",width=8,font=('SimHei',12),command=t_table1.delete_data).grid(row=2,column=3,pady=5,padx=15)
     Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=t_table1.search_data).grid(row=3,column=2,pady=5,padx=15)
-    Button(frm,text="确认购票信息",width=12,font=('SimHei',12),command=finish_data).grid(row=3,column=3,pady=5,padx=5)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=select_data).grid(row=4,column=2,pady=5,padx=15)
-    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=history_data).grid(row=4,column=3,pady=5,padx=5)
+    Button(frm,text="确认购票信息",width=12,font=('SimHei',12),command=lambda:finish_data(t_table2)).grid(row=3,column=3,pady=5,padx=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1)).grid(row=4,column=2,pady=5,padx=15)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data).grid(row=4,column=3,pady=5,padx=5)
+    t_table1.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
 
 
