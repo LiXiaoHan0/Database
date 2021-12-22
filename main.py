@@ -5,6 +5,7 @@ from tkinter import ttk # 树状表格
 # 全局变量
 flag=0 # 连接情况
 user_data=(-1,'0','无',0,('无','无')) # 用户信息
+tmp_data=[] # 临时记录
 
 root=Tk() # 根窗口
 screen_x=root.winfo_screenwidth() # 屏幕宽度
@@ -98,13 +99,18 @@ class table: # 自定义表格
             tmp.move(k,'',i)
         tmp.heading(col,command=lambda:self.sort_column(col,not way))
 
-    def delete_data(self,method): # 删除数据
+    def delete_data(self,method=0): # 删除数据
         tmp=self.chart
-        if(len(tmp.selection())==0):
-            msg('err','提示','未选择任何数据！')
-        else:
-            # if(messagebox.askokcancel('提示', '相关信息也将被删除，确定要删除数据吗？')):
-            method([tmp.set(k,"课程号") for k in tmp.selection()])
+        if(method==0):
+            for k in tmp.get_children():
+                tmp.delete(k) 
+        elif(method==1):
+            if(len(tmp.selection())==0):
+                msg('err','提示','未选择任何数据！')
+            else:
+                if(messagebox.askokcancel('提示', '确定要删除选定的数据吗？')):
+                    for k in tmp.selection():
+                        tmp.delete(k) 
 
     def search_data(self,*arg): # 获取数据
         for i in self.chart.get_children(''):
@@ -171,7 +177,7 @@ class order: # 自定义数量单
         if(self.num.get()!=''):
             self.form.destroy()
             print(self.num.get())
-            self.method(self.num.get())
+            self.method(int(self.num.get()))
         else:
             msg('err','提示','未选择购票数量！')
             self.form.focus_set()
@@ -278,23 +284,67 @@ def show_volunteer(): # 查看志愿任务分配
 
 def ticket_data(*event): # 获取票务信息
     # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）'，例如：
-    return (('跳台滑雪','2月25日09:00-10:00','20','100'),('高山滑雪','2月26日19:00-20:00','50','80'))
-    
-def select_data(table): # 选择票务信息
-    if(len(table.chart.selection())==0):
+    return (('跳台滑雪','2月25日09:00-10:00','20','100'),('高山滑雪','2月26日19:00-20:00','50','80'),('花样滑冰','2月28日15:00-16:00','0','80'))
+
+def update_ticket(n,table1,table2,label):
+    def update():
+        global tmp_data
+        tmp_data=[]
+        table1.search_data()
+        table2.delete_data()
+        label.configure(text="合计金额：0")
+    if(n==1): # 清空门票信息
+        print(table2.chart.get_children())
+        if(len(table2.chart.get_children())==0):
+            msg('err','提示','没有选定任何门票！')
+        else:
+            if(messagebox.askokcancel('提示', '确定要清空已选门票信息吗？')):  
+                update()
+    elif(n==2): # 刷新门票信息
+        if(len(table2.chart.get_children())==0):
+            update()
+        elif(messagebox.askokcancel('提示', '刷新会清空已选门票信息，确定要继续吗？')):
+            update()
+    elif(n==3): # 删除部分门票信息
+        pass
+
+def select_data(table1,table2,label): # 选择票务信息
+    chart1=table1.chart
+    chart2=table2.chart
+    if(len(chart1.selection())==0):
         msg('err','提示','未选择任何数据！')
-    elif(len(table.chart.selection())>1):
+    elif(len(chart1.selection())>1):
         msg('err','提示','一次只能选择一条数据！')
-    elif(False):
+    elif(int(chart1.set(chart1.selection()[0],"门票剩余"))==0):
         msg('err','提示','该场次已没有余票！')
     else:
         def add_data(num):
             print('购票数量为：'+str(num))
-        print(table.chart.selection())
-        order(frm,'选择购票数量','购票数量：',20,add_data)
+            selection=(chart1.set(choice,"比赛项目"),str(num),num*int(chart1.set(choice,"门票价格")))
+            print(selection)
+            chart1.set(choice,"门票剩余",int(chart1.set(choice,"门票剩余"))-num)
+            chart2.insert('',len(tmp_data),values=selection)
+            tmp_data.append(selection)
+            ans=0 # 计算总金额
+            for i in tmp_data: 
+                ans+=i[2]
+            label.configure(text="合计金额："+str(ans))
+        choice=chart1.selection()[0]
+        print(chart1.set(choice,"门票剩余"))
+        order(frm,'选择购票数量','购票数量：',chart1.set(choice,"门票剩余"),add_data)
 
-def finish_data(chart): # 开始结账
-    pass
+def finish_data(label): # 开始结账
+    # !!! 给出购票信息，修改余票数量
+    # 格式（比赛项目，购票数量，单项金额小计）
+    global tmp_data
+    print(tmp_data)
+    if(True):
+        msg('inf',"提示","购票成功！")
+        tmp_data=[]
+        label.configure(text="合计金额：0")
+        call_ticket()
+    else:
+        pass
 
 def history_data(): # 查看历史信息
     print(user_data[1])
@@ -326,27 +376,28 @@ def call_info(): # 个人信息页面
 
 def call_ticket(): # 票务页面
     clear()
-    sum=0 # 总金额
     global frm
     frm=Frame(form)
     form.geometry("720x350")
     heads1=[('比赛项目','比赛时间','门票剩余','门票价格'),(0,80,280,340,400)]
-    heads2=[('比赛项目','购票数量','单项价格'),(0,80,160,240)]
+    heads2=[('比赛项目','购票数量','金额小计'),(0,80,160,240)]
     t_table1=table(frm,12,heads1,ticket_data)
     t_table2=table(frm,6,heads2,lambda:())
+    l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
 
     t_table1.chart.grid(row=1,column=0,rowspan=4,pady=5)
     t_table1.ybar.grid(row=1,column=1,rowspan=4,sticky='ns',pady=5)
     t_table2.chart.grid(row=1,column=2,columnspan=2,pady=10)
     t_table2.ybar.grid(row=1,column=4,sticky='ns',pady=10)
+    l_sum.grid(row=2,column=2,pady=8)
     Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0)
     Label(frm,text="已选门票",font=('SimHei',16)).grid(row=0,columnspan=3,column=2)
-    Label(frm,text="合计金额："+str(sum),font=('SimHei',12)).grid(row=2,column=2,pady=8)
-    Button(frm,text="清空订单",width=8,font=('SimHei',12),command=t_table1.delete_data).grid(row=2,column=3,pady=5,padx=15)
-    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=t_table1.search_data).grid(row=3,column=2,pady=5,padx=15)
-    Button(frm,text="确认购票信息",width=12,font=('SimHei',12),command=lambda:finish_data(t_table2)).grid(row=3,column=3,pady=5,padx=5)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1)).grid(row=4,column=2,pady=5,padx=15)
-    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data).grid(row=4,column=3,pady=5,padx=5)
+    Button(frm,text="清空订单",width=8,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=2,column=3,pady=5,padx=15)
+    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=3,column=2,pady=5,padx=15)
+    # 删除部分数据，待定
+    Button(frm,text="确认购票信息",width=12,font=('SimHei',12),command=lambda:finish_data(l_sum)).grid(row=3,column=3,pady=5,padx=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1,t_table2,l_sum)).grid(row=4,column=2,pady=5,padx=15)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data()).grid(row=4,column=3,pady=5,padx=5)
     t_table1.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
 
