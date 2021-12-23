@@ -411,13 +411,14 @@ def call_ticket(): # 票务页面
     l_sum.grid(row=2,column=3,pady=8)
     Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
     Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
-    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_data(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8,padx=5)
-    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=8,padx=15)
-    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=8,padx=15)
-    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8,padx=15)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8,padx=15)
-    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data()).grid(row=4,column=3,columnspan=2,pady=8,padx=5)
-    t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum))
+    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_data(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8)
+    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=8)
+    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=8)
+    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data()).grid(row=4,column=3,columnspan=2,pady=8)
+    t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
+    t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
 
@@ -427,7 +428,7 @@ def call_item(): # 商品页面
     pass
 
 
-def call_manager(): # 商品管理页面
+def call_manager(): # 票务&商品管理页面
     clear()
     pass
 
@@ -448,38 +449,16 @@ if(user_data[0]>=0):
     frm=Frame(form) # 页面框架
     option=Menu(form) # 菜单栏
     user_pic=tkinter.PhotoImage(file="figures/user.gif") # 用户照片
-    option.add_command(label ="个人信息",command=call_info)
+    option.add_command(label =" 个人信息 ",command=call_info)
     if(user_data[0]!=3):
-        option.add_command(label ="订票服务",command=call_ticket)
-        option.add_command(label ="购买商品",command=call_item)
+        option.add_command(label =" 订票服务 ",command=call_ticket)
+        option.add_command(label =" 购买商品 ",command=call_item)
     else:
-        option.add_command(label ="商品管理",command=call_manager)
-        option.add_command(label ="志愿管理",command=call_volunteer)
+        option.add_command(label =" 票务&商品管理 ",command=call_manager)
+        option.add_command(label =" 志愿管理 ",command=call_volunteer)
     form.config(menu=option)
 
     call_info()
-    # print(approve_volunteer()[0]=='11111111')
-
     form.mainloop()
-        
-    # m_heads=[('课程号','课程名','学分','学时','先修要求'),(0,100,300,400,550,700)] # 表头及列宽
-
-    # m_frm=Frame(form)
-    # m_table=main_table(m_frm,15,m_heads)
-    # m_table.chart.bind('<Double-1>',m_table.change_data)
-
-    # # 组件定位
-    # m_table.chart.grid(row=0,column=0,columnspan=12,pady=12)
-    # m_table.ybar.grid(row=0,column=12,sticky='ns',pady=12)
-    # Button(m_frm,text="获取",width=6,font=('Arial',12),command=lambda:m_table.search_data(0)).grid(row=1,column=1)
-    # Button(m_frm,text="详情",width=6,font=('Arial',12),command=lambda:detail_info(m_table.chart)).grid(row=1,column=2)
-    # Button(m_frm,text="新建",width=6,font=('Arial',12),command=lambda:add_info(m_table)).grid(row=1,column=5)
-    # Button(m_frm,text="删除",width=6,font=('Arial',12),command=lambda:m_table.delete_data(delete)).grid(row=1,column=6)
-    # # Button(m_frm,text="导出",width=6,font=('Arial',12),command=export_info).grid(row=1,column=7)
-    # # Button(m_frm,text="打印",width=6,font=('Arial',12),command=print_info).grid(row=1,column=8)
-    # Button(m_frm,text="保存",width=6,font=('Arial',12),command=save_all).grid(row=1,column=9)
-    # Button(m_frm,text="退出",width=6,font=('Arial',12),command=exit_all).grid(row=1,column=10)
-    # m_frm.pack(pady=10)
-    # form.mainloop()
 
 finish(flag) # 结束数据库连接
