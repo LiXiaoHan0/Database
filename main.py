@@ -267,19 +267,21 @@ def clear(): # 清除页面布局
     global frm
     frm.destroy()
 
+
 # ------- 个人信息页面 --------
 
-def apply_volunteer(): # 申请成为志愿者
-    print(user_data[1])
-    if(True): # !!! 提供申请志愿者的账号，返回操作是否成功
+def apply_volunteers(): # 申请成为志愿者
+    if(apply_volunteer(user_data[1])):
         user_data[0]=1
         call_info()
+        msg('inf','提示','申请提交成功！')
     
 def show_volunteer(): # 查看志愿任务分配
     if(user_data[5][0]!=''):
         msg('inf','志愿任务查看','您分配到的场馆为'+user_data[5][0]+'，您负责的工作是'+user_data[5][1]+'。')
     else:
         msg('inf','您还没有被分配具体任务！')
+
 
 # ------- 订票业务页面 --------
 
@@ -372,9 +374,10 @@ def history_data(): # 查看历史信息
     print(user_data[1])
     # !!! 给出用户账号，返回用户历史订单信息
 
+
 # ------- 志愿管理页面 --------
 
-def check_volunteers(n,table1,table2):
+def check_volunteers(n,table1,table2): # 审批志愿者申请
     tmp_flag=True
     chart=table1.chart
     if(len(chart.selection())==0):
@@ -392,7 +395,7 @@ def check_volunteers(n,table1,table2):
     else:
         call_volunteer()
 
-def allocate_assigns(table2,table3):
+def allocate_assigns(table2,table3): # 分配志愿者任务
     chart2=table2.chart
     chart3=table3.chart
     if(len(chart3.selection())!=1):
@@ -412,11 +415,9 @@ def allocate_assigns(table2,table3):
             commit()
             msg('inf','提示','分配成功！')
         else:
-            call_volunteer()
-        
-        
+            call_volunteer() 
 
-def new_assigns(table):
+def new_assigns(table): # 创建新的志愿任务
 
     class assign_subform(subform): # 继承
 
@@ -432,8 +433,7 @@ def new_assigns(table):
    
     assign_subform(form,'创建志愿任务',[('场馆：','请选择场馆',1,get_venue()),('详情：','请简述任务内容',0)])
 
-
-def delete_assigns(table2,table3):
+def delete_assigns(table2,table3): # 删除志愿者任务
     chart3=table3.chart
     if(len(chart3.selection())==0):
         msg('err','提示','没有选择任何信息！')
@@ -452,6 +452,7 @@ def delete_assigns(table2,table3):
         else:
             call_volunteer()
 
+
 # ------------------------- 操作界面子布局 -----------------------------
 
 def call_info(): # 个人信息页面
@@ -464,13 +465,13 @@ def call_info(): # 个人信息页面
     Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=40)
     for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
         Label(frm,text=txt + str(user_data[i+1]),font=('SimHei',16),width=16,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)          
-    Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=20)
+    Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=25)
     if(user_data[0]==0):
-        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',15),command=apply_volunteer).grid(row=4,column=1,columnspan=2,pady=20)
+        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',15),command=apply_volunteers).grid(row=4,column=1,columnspan=2,pady=25)
     elif(user_data[0]==1):
-        Label(frm,text="志愿申请已提交",font=('SimHei',15)).grid(row=4,column=1,columnspan=2,pady=20)
+        Label(frm,text="志愿申请已提交",font=('SimHei',15)).grid(row=4,column=1,columnspan=2,pady=25)
     elif(user_data[0]==2):
-        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',15),command=show_volunteer).grid(row=4,column=1,columnspan=2,pady=20)  
+        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',15),command=show_volunteer).grid(row=4,column=1,columnspan=2,pady=25)  
     frm.pack(padx=20,pady=20)
 
 

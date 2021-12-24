@@ -16,7 +16,6 @@ def msg(pattern,title,content):
     elif(pattern=='err'):
         messagebox.showerror(title=title,message=content)
 
-
 def inspect(txt,var,pre,length,*limit): # 输入格式判断 
 
     # 参数：文本，类型，前缀，定长值，*最短值，*最长值
@@ -39,6 +38,7 @@ def inspect(txt,var,pre,length,*limit): # 输入格式判断
         return True
     return False
 
+
 # ----------------------- 数据库连接 ----------------------
 
 def connect(): # 连接数据库
@@ -51,18 +51,16 @@ def connect(): # 连接数据库
         msg('err','错误',str(e))
         return 0
 
-
 def commit(): # 提交修改
     conn.commit()
-
 
 def finish(flag): # 关闭连接
     if(flag):
         cursor.close()
         conn.close()
 
-#------------------------- 登录界面 ---------------------------
 
+#------------------------- 登录界面 ---------------------------
 
 def check(account, password):    # 登录检验
     res = (inspect(account,'账号栏','int', 8))
@@ -101,7 +99,6 @@ def check(account, password):    # 登录检验
             msg('err', '错误', str(e))
             return -1
 
-
 def sign_in(name, age, sex, password, confirm):      # 提交注册
     if (inspect(name,'str','姓名',0,1,18)):
         return False
@@ -131,8 +128,17 @@ def sign_in(name, age, sex, password, confirm):      # 提交注册
             msg('err','错误',str(e))
             return False
 
+def apply_volunteer(account):
+    try:
+        cursor.execute("update VISITOR_VOLUNTEER set state=1 where account='%s'"%(account))
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
 
-#----------------------------操作部分-----------------------------------
+
+#----------------------------志愿管理部分-----------------------------------
 
 def get_venue():
     try:
