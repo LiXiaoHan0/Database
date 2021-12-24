@@ -214,7 +214,7 @@ def sign_data(): # 注册界面
             else:
                 self.form.focus_set()
 
-    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,['男','女']),('密码：','请设置20字符以内密码',0),('确认密码：','请再次输入密码',0)])
+    sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,('男','女')),('密码：','请设置20字符以内密码',0),('确认密码：','请再次输入密码',0)])
 
 
 # ------------------------- 登录界面布局 -----------------------------
@@ -375,23 +375,82 @@ def history_data(): # 查看历史信息
 # ------- 志愿管理页面 --------
 
 def check_volunteers(n,table1,table2):
+    tmp_flag=True
     chart=table1.chart
     if(len(chart.selection())==0):
         msg('err',"提示","未选择任何申请者！")
     else:
         for i in chart.selection():
-            approve_volunteer(n,chart.set(i,"用户账号"))
-            table1.delete_data(1)
-    table2.search_data(2)
+            if(approve_volunteer(n,chart.set(i,"用户账号"))):
+                tmp_flag=False
+                break
+            else:
+                table1.delete_data(1)
+    if(tmp_flag):
+        table2.search_data(2)
+        commit()
+    else:
+        call_volunteer()
 
 def allocate_assigns(table2,table3):
-    pass
+    chart2=table2.chart
+    chart3=table3.chart
+    if(len(chart3.selection())!=1):
+        msg('err','提示','请选择一项任务进行分配！')
+    elif(len(chart2.selection())==0):
+        msg('err','提示','没有选择要分配的志愿者！')
+    else:
+        tmp_flag=True
+        ano=chart3.set(chart3.selection()[0],'任务编号')
+        for i in chart2.selection():
+            if(allocate_assignment(chart2.set(i,'用户账号'),ano)):
+                tmp_flag=False
+                break
+            else:
+                chart2.set(i,"任务编号",ano)
+        if(tmp_flag):
+            commit()
+            msg('inf','提示','分配成功！')
+        else:
+            call_volunteer()
+        
+        
 
 def new_assigns(table):
-    pass
 
-def delete_assigns(table):
-    pass
+    class assign_subform(subform): # 继承
+
+        def submit_data(self,*event): # 提交数据
+            self.get_data() # 刷新数据
+            print(self.vars[0],self.vars[1])
+            if(new_assign(self.vars[0],self.vars[1])):
+                table.search_data()
+                self.exit_form()
+                msg('inf','提示','新建成功！')
+            else:
+                self.form.focus_set()
+   
+    assign_subform(form,'创建志愿任务',[('场馆：','请选择场馆',1,get_venue()),('详情：','请简述任务内容',0)])
+
+
+def delete_assigns(table2,table3):
+    chart3=table3.chart
+    if(len(chart3.selection())==0):
+        msg('err','提示','没有选择任何信息！')
+        return
+    tmp_flag=True
+    if(messagebox.askokcancel('提示', '确定要删除该任务吗？相关信息也会被删除')):
+        for i in chart3.selection():
+            if(delete_assign(chart3.set(i,'任务编号'))):
+                tmp_flag=False
+                break
+        if(tmp_flag):
+            table2.search_data(2)
+            table3.delete_data(1)
+            commit()
+            msg('inf','提示','删除成功！')
+        else:
+            call_volunteer()
 
 # ------------------------- 操作界面子布局 -----------------------------
 
@@ -480,7 +539,7 @@ def call_volunteer(): # 志愿管理页面
     Button(frm,text="审批拒绝",width=10,font=('SimHei',12),command=lambda:check_volunteers(0,t_table1,t_table2)).grid(row=2,column=1,pady=10)
     Button(frm,text="分配任务",width=10,font=('SimHei',12),command=lambda:allocate_assigns(t_table2,t_table3)).grid(row=2,column=4,pady=10)
     Button(frm,text="新建任务",width=10,font=('SimHei',12),command=lambda:new_assigns(t_table3)).grid(row=2,column=7,pady=10)
-    Button(frm,text="删除任务",width=10,font=('SimHei',12),command=lambda:delete_assigns(t_table3)).grid(row=2,column=8,pady=10)
+    Button(frm,text="删除任务",width=10,font=('SimHei',12),command=lambda:delete_assigns(t_table2,t_table3)).grid(row=2,column=8,pady=10)
     t_table1.search_data(1)
     t_table2.search_data(2)
     t_table3.search_data()

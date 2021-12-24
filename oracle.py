@@ -123,6 +123,7 @@ def sign_in(name, age, sex, password, confirm):      # 提交注册
                 account = str(int(cursor.fetchone()[0]) + 1)
             # 设置一个默认初始值，空表插入用默认值作为账号，其他则用此账号依次加一
             cursor.execute("insert into users values('%s', %d, '%s', '%s', '%s')" %(name,int(age), sex, account, password))
+            cursor.execute("insert into VISITOR_VOLUNTEER values('%s',0,'')" %(account))
             commit()
             msg('inf','提示','注册成功！您的账号为'+account+'。')
             return True
@@ -133,6 +134,37 @@ def sign_in(name, age, sex, password, confirm):      # 提交注册
 
 #----------------------------操作部分-----------------------------------
 
+def get_venue():
+    try:
+        cursor.execute("select vname from venue")
+        res = cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return ()
+
+def new_assign(detail,venue):
+    try:
+        cursor.execute("select vno from venue where vname='%s'"%(venue))
+        res=cursor.fetchone()[0]
+        cursor.execute("insert into assign values(q_assign.nextVal,'%s','%s')"%(detail,res))
+        cursor.execute("select q_assign.currVal from dual")
+        res=cursor.fetchone()[0]
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
+
+def delete_assign(ano):
+    try:
+        cursor.execute("update VISITOR_VOLUNTEER set assign='' where assign='%s'"%(ano))
+        cursor.execute("delete from assign where ano='%s'"%(ano))
+        return False
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return True
+
 def volunteer_list(*arg):                  # 申请者或志愿者
     try:
         cursor.execute("select a.account,uname,assign from visitor_volunteer a,users b where state =%s and a.account=b.account"%arg)
@@ -140,16 +172,15 @@ def volunteer_list(*arg):                  # 申请者或志愿者
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        return False
+        return ()
 
 def approve_volunteer(n,account):                     # 审批同意或拒绝
     try:
         cursor.execute("update visitor_volunteer set state =%s where account = '%s'" %(n,account))
-        commit()
-        return True
+        return False
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        return False
+        return True
 
 def assignment_list(*arg):                            # 获取所有任务信息
     try:
@@ -158,13 +189,13 @@ def assignment_list(*arg):                            # 获取所有任务信息
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        return False
+        return ()
 
-def allocate_assignment(account, ANo):                # 给志愿者分配任务
+def allocate_assignment(account,ANo):                # 给志愿者分配任务
     try:
         cursor.execute("update visitor_volunteer set assign = '%s' where account = '%s'" %(ANo, account))
         commit()
-        return True
+        return False
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        return False
+        return True
