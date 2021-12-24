@@ -4,7 +4,14 @@ from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-user_data=(-1,'0','无',0,('无','无')) # 用户信息
+debug=3 # 调试模式，可以跳过登录界面
+user_data=(-1,'0','无','无',0,('无','无')) # 用户信息
+# -1:账号不存在或密码错误；
+# 0:未申请为志愿者；
+# 1:申请成为志愿者；
+# 2:已经成为志愿者；
+# 3:管理员
+# 示例 user_data=(2,'3','李晗','男','19岁',('冰立方','制冰'))
 
 root=Tk() # 根窗口
 screen_x=root.winfo_screenwidth() # 屏幕宽度
@@ -110,8 +117,8 @@ class table: # 自定义表格
                 for k in tmp.selection():
                     tmp.delete(k)
 
-    def search_data(self,*arg): # 获取数据
-        for i in self.chart.get_children(''):
+    def search_data(self,arg=0): # 获取数据
+        for i in self.chart.get_children():
             self.chart.delete(i)
         self.data=self.search(arg)
         for i,val in enumerate(self.data):
@@ -186,16 +193,12 @@ class order: # 自定义数量单
 
 def check_login(*arg): # 登录检验
     global user_data
-    print(l_e1.get(),l_e2.get()) # 所需数据
-    tmp_data=check(l_e1.get(), l_e2.get())
-    if(tmp_data!=-1):
-        user_data=tmp_data
-    # user_data=(2,'3','李晗','男','19岁',('冰立方','制冰')) # 示例
-    # -1:账号不存在或密码错误
-    # 0:未申请为志愿者；
-    # 1:申请成为志愿者；
-    # 2:已经成为志愿者；
-    # 3:管理员
+    if(debug>=0 and l_e1.get()==''): # 测试专用
+        user_data=(debug,'00000000','测试账号','无','99',('宿舍','码代码'))
+    else:
+        tmp_data=check(l_e1.get(), l_e2.get())
+        if(tmp_data!=-1):
+            user_data=tmp_data
     if(user_data[0]!=-1): login.destroy()
 
 
@@ -280,7 +283,7 @@ def show_volunteer(): # 查看志愿任务分配
 
 # ------- 订票业务页面 --------
 
-def ticket_data(*event): # 获取票务信息
+def ticket_data(*arg): # 获取票务信息
     # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）'，例如：
     return (('跳台滑雪','2月25日09:00-10:00','20','100'),('高山滑雪','2月26日19:00-20:00','50','80'),('花样滑冰','2月28日15:00-16:00','0','80'))
 
@@ -369,6 +372,26 @@ def history_data(): # 查看历史信息
     print(user_data[1])
     # !!! 给出用户账号，返回用户历史订单信息
 
+# ------- 志愿管理页面 --------
+
+def check_volunteers(n,table1,table2):
+    chart=table1.chart
+    if(len(chart.selection())==0):
+        msg('err',"提示","未选择任何申请者！")
+    else:
+        for i in chart.selection():
+            approve_volunteer(n,chart.set(i,"用户账号"))
+            table1.delete_data(1)
+    table2.search_data(2)
+
+def allocate_assigns(table2,table3):
+    pass
+
+def new_assigns(table):
+    pass
+
+def delete_assigns(table):
+    pass
 
 # ------------------------- 操作界面子布局 -----------------------------
 
@@ -379,7 +402,6 @@ def call_info(): # 个人信息页面
     form.geometry("480x280")
     power=['群众','群众','志愿者','管理员']
 
-    # form.geometry("600x300")
     Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=40)
     for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
         Label(frm,text=txt + str(user_data[i+1]),font=('SimHei',16),width=16,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)          
@@ -435,7 +457,34 @@ def call_manager(): # 票务&商品管理页面
 
 def call_volunteer(): # 志愿管理页面
     clear()
-    pass
+    global frm
+    frm=Frame(form)
+    form.geometry("800x400")
+    heads1=[('用户账号','用户姓名'),(0,100,180)]
+    heads2=[('用户账号','用户姓名','任务编号'),(0,100,180,240)]
+    heads3=[('任务编号','任务地点','任务详情'),(0,60,140,240)]
+    t_table1=table(frm,12,heads1,lambda n:volunteer_list(n))
+    t_table2=table(frm,12,heads2,lambda n:volunteer_list(n))
+    t_table3=table(frm,12,heads3,assignment_list)
+
+    t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
+    t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)
+    t_table2.chart.grid(row=1,column=4,pady=5)
+    t_table2.ybar.grid(row=1,column=5,sticky='ns',pady=5)
+    t_table3.chart.grid(row=1,column=7,columnspan=2,pady=5)
+    t_table3.ybar.grid(row=1,column=9,sticky='ns',pady=5)
+    Label(frm,text="申请人信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
+    Label(frm,text="志愿者信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=2)
+    Label(frm,text="志愿任务信息",font=('SimHei',16)).grid(row=0,column=6,columnspan=3)
+    Button(frm,text="审批通过",width=10,font=('SimHei',12),command=lambda:check_volunteers(2,t_table1,t_table2)).grid(row=2,column=0,pady=10)
+    Button(frm,text="审批拒绝",width=10,font=('SimHei',12),command=lambda:check_volunteers(0,t_table1,t_table2)).grid(row=2,column=1,pady=10)
+    Button(frm,text="分配任务",width=10,font=('SimHei',12),command=lambda:allocate_assigns(t_table2,t_table3)).grid(row=2,column=4,pady=10)
+    Button(frm,text="新建任务",width=10,font=('SimHei',12),command=lambda:new_assigns(t_table3)).grid(row=2,column=7,pady=10)
+    Button(frm,text="删除任务",width=10,font=('SimHei',12),command=lambda:delete_assigns(t_table3)).grid(row=2,column=8,pady=10)
+    t_table1.search_data(1)
+    t_table2.search_data(2)
+    t_table3.search_data()
+    frm.pack(padx=20,pady=20)
 
 
 # ------------------------- 操作界面主布局 -----------------------------

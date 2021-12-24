@@ -132,26 +132,28 @@ def sign_in(name, age, sex, password, confirm):      # 提交注册
 
 
 #----------------------------操作部分-----------------------------------
-def volunteer_approval_list(*arg):                  # 点击管理员选项中的“志愿管理”和刷新都可以进入这一选项
+
+def volunteer_list(*arg):                  # 申请者或志愿者
     try:
-        cursor.execute("select account from visitor_volunteer where state = 1")
+        cursor.execute("select a.account,uname,assign from visitor_volunteer a,users b where state =%s and a.account=b.account"%arg)
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         return False
 
-def approve_volunteer(account):                     # 审批同意，可以在点击“同意”按钮时调用
+def approve_volunteer(n,account):                     # 审批同意或拒绝
     try:
-        cursor.execute("update visitor_volunteer set state = 2 where account = '%s'" %account)
+        cursor.execute("update visitor_volunteer set state =%s where account = '%s'" %(n,account))
+        commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         return False
-        
-def volunteer_list(*arg):                            # 获取所有已经是志愿者的人的信息
+
+def assignment_list(*arg):                            # 获取所有任务信息
     try:
-        cursor.execute("select account from visitor_volunteer where state = 2")
+        cursor.execute("select a.ano,vname,detail from assign a,venue b where a.venue=b.vno")
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
@@ -161,6 +163,7 @@ def volunteer_list(*arg):                            # 获取所有已经是志�
 def allocate_assignment(account, ANo):                # 给志愿者分配任务
     try:
         cursor.execute("update visitor_volunteer set assign = '%s' where account = '%s'" %(ANo, account))
+        commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
