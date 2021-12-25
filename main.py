@@ -584,7 +584,7 @@ def call_manager(): # 票务&商品管理页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("900x380")
+    form.geometry("900x390")
     heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,60,160,280,340,400,460,540)]
     heads2=[('商品编号','商品名称','商品存量','商品价格'),(0,60,160,220,280)]
     t_table1=table(frm,12,heads1,match_info)
