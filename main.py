@@ -285,9 +285,9 @@ def show_volunteer(): # 查看志愿任务分配
 
 # ------- 订票业务页面 --------
 
-def ticket_data(*arg): # 获取票务信息
+# def ticket_data(*arg): # 获取票务信息
     # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）','比赛地点'，例如：
-    return (('1','跳台滑雪','2月25日09:00-10:00','20','100','滑雪大跳台'),('1','高山滑雪','2月26日19:00-20:00','50','80','滑雪大跳台'),('1','花样滑冰','2月28日15:00-16:00','0','80','冰立方'))
+    # return (('1','跳台滑雪','2月25日09:00-10:00','20','100','滑雪大跳台'),('1','高山滑雪','2月26日19:00-20:00','50','80','滑雪大跳台'),('1','花样滑冰','2月28日15:00-16:00','0','80','冰立方'))
 
 def update_ticket(n,table1,table2,label):
     def clear_all():
@@ -362,10 +362,13 @@ def finish_data(chart2,label): # 开始结账
         msg('err','提示','未选择任何门票信息！')
     elif(True):
         global ans
-        the_data=[ans]
+        the_data=[user_data[1], ans]
         for i in chart2.get_children():
             the_data.append((chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))))
         print(the_data)
+        print(the_data[1])
+        print(the_data[2][0])
+        ticket_deal(the_data)
         # !!! 给出购票信息，修改余票数量
         # 格式（比赛项目，购票数量，单项金额小计）
         msg('inf',"提示","购票成功！")
@@ -471,7 +474,6 @@ def new_assigns(table): # 创建新的志愿任务
                 msg('inf','提示','新建成功！')
             else:
                 self.form.focus_set()
-   
     assign_subform(form,'创建志愿任务',[('场馆：','请选择场馆',1,get_venue()),('详情：','请简述任务内容',0)])
 
 def delete_assigns(table2,table3): # 删除志愿者任务
@@ -523,7 +525,7 @@ def call_ticket(): # 票务页面
     form.geometry("840x400")
     heads1=[('比赛编号','比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,60,140,260,320,380,460)]
     heads2=[('比赛编号','比赛项目','购票数量','金额小计'),(0,60,140,220,300)]
-    t_table1=table(frm,12,heads1,ticket_data)
+    t_table1=table(frm,12,heads1,ticket_info)
     t_table2=table(frm,8,heads2,lambda:())
     l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
 
