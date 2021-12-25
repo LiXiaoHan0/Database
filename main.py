@@ -287,7 +287,7 @@ def show_volunteer(): # 查看志愿任务分配
 
 def ticket_data(*arg): # 获取票务信息
     # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）','比赛地点'，例如：
-    return (('跳台滑雪','2月25日09:00-10:00','20','100','滑雪大跳台'),('高山滑雪','2月26日19:00-20:00','50','80','滑雪大跳台'),('花样滑冰','2月28日15:00-16:00','0','80','冰立方'))
+    return (('1','跳台滑雪','2月25日09:00-10:00','20','100','滑雪大跳台'),('1','高山滑雪','2月26日19:00-20:00','50','80','滑雪大跳台'),('1','花样滑冰','2月28日15:00-16:00','0','80','冰立方'))
 
 def update_ticket(n,table1,table2,label):
     def clear_all():
@@ -348,7 +348,7 @@ def select_data(table1,table2,label): # 选择票务信息
                     chart2.set(i,"金额小计",int(chart2.set(i,"购票数量"))*int(chart1.set(choice,"门票价格")))
                     update_sum()
                     return
-            selection=[chart1.set(choice,"比赛项目"),num,num*int(chart1.set(choice,"门票价格"))]
+            selection=[chart1.set(choice,"比赛编号"),chart1.set(choice,"比赛项目"),num,num*int(chart1.set(choice,"门票价格"))]
             chart2.insert('',len(chart2.get_children()),values=selection)
             update_sum()
         choice=chart1.selection()[0]
@@ -359,7 +359,7 @@ def finish_data(chart2,label): # 开始结账
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何门票信息！')
     elif(True):
-        the_data=[(chart2.set(i,"比赛项目"),chart2.set(i,"购票数量")) for i in chart2.get_children()]
+        the_data=[(chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))) for i in chart2.get_children()]
         print(the_data)
         # !!! 给出购票信息，修改余票数量
         # 格式（比赛项目，购票数量，单项金额小计）
@@ -479,9 +479,9 @@ def call_ticket(): # 票务页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("770x400")
-    heads1=[('比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,80,260,320,380,440)]
-    heads2=[('比赛项目','购票数量','金额小计'),(0,80,160,240)]
+    form.geometry("840x400")
+    heads1=[('比赛编号','比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,60,140,260,320,380,460)]
+    heads2=[('比赛编号','比赛项目','购票数量','金额小计'),(0,60,140,220,300)]
     t_table1=table(frm,12,heads1,ticket_data)
     t_table2=table(frm,8,heads2,lambda:())
     l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
@@ -514,16 +514,16 @@ def call_manager(): # 票务&商品管理页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("640x400")
-    heads1=[('比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,80,260,320,380)]
-    heads2=[('商品名称','商品存量','商品价格'),(0,80,160,240)]
+    form.geometry("700x400")
+    heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,80,260,320,400)]
+    heads2=[('商品编号','商品名称','商品存量','商品价格'),(0,80,160,240)]
     t_table1=table(frm,12,heads1,lambda:())
     t_table2=table(frm,12,heads2,lambda:())
 
-    t_table1.chart.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
-    t_table1.ybar.grid(row=1,column=2,rowspan=3,sticky='ns',pady=5)
-    t_table2.chart.grid(row=1,column=3,columnspan=2,pady=10)
-    t_table2.ybar.grid(row=1,column=5,sticky='ns',pady=10)
+    t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
+    t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)
+    t_table2.chart.grid(row=1,column=4,columnspan=2,pady=5)
+    t_table2.ybar.grid(row=1,column=6,sticky='ns',pady=5)
     Label(frm,width=10).grid(row=0,column=3)
     Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
@@ -532,11 +532,9 @@ def call_manager(): # 票务&商品管理页面
     Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:()).grid(row=2,column=4,pady=10)
     Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:()).grid(row=2,column=5,pady=10)
 
-
-
     # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
     # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
-    t_table1.search_data() # 初始化票务信息
+    # t_table1.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
     pass
 
