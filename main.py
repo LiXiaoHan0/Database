@@ -359,7 +359,7 @@ def finish_data(chart2,label): # 开始结账
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何门票信息！')
     elif(True):
-        the_data=[(chart2.set(i,"比赛编号"),chart2.set(i,"购票数量")) for i in chart2.get_children()]
+        the_data=[(chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))) for i in chart2.get_children()]
         print(the_data)
         # !!! 给出购票信息，修改余票数量
         # 格式（比赛项目，购票数量，单项金额小计）
@@ -479,8 +479,8 @@ def call_ticket(): # 票务页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("770x400")
-    heads1=[('比赛编号','比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,60,140,300,360,420,480)]
+    form.geometry("840x400")
+    heads1=[('比赛编号','比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,60,140,260,320,380,460)]
     heads2=[('比赛编号','比赛项目','购票数量','金额小计'),(0,60,140,220,300)]
     t_table1=table(frm,12,heads1,ticket_data)
     t_table2=table(frm,8,heads2,lambda:())
