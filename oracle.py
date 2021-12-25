@@ -156,7 +156,7 @@ def new_assign(detail,venue):
     try:
         cursor.execute("select vno from venue where vname='%s'"%(venue))
         res=cursor.fetchone()[0]
-        cursor.execute("insert into assign values(q_assign.nextVal,'%s','%s')"%(detail,res))
+        cursor.execute("insert into assign values(LPAD(q_assign.nextVal,8,0),'%s','%s')"%(detail,res))
         cursor.execute("select q_assign.currVal from dual")
         res=cursor.fetchone()[0]
         commit()
@@ -226,15 +226,14 @@ def ticket_deal(tup, *arg):              # 购票结账
         sum = tup[1]
         account = tup[0]
         import time
-        date = time.strftime("%Y-%m-%d", time.localtime()) 
-        dno = '00000001'
+        date = time.strftime("%Y-%m-%d", time.localtime())
+        cursor.execute("insert into ticketdeal values (LPAD(q_dno.nextVal,8,0), '%s', %d, '%s')"%(date, sum, account))
         for i in range (2, len(tup)):
-            cursor.execute("insert into ticketsale values ('%s', '%s', %d)"%(dno, tup[i][0], tup[i][1]))
+            cursor.execute("insert into ticketsale values (LPAD(q_dno.currVal,8,0), '%s', %d)"%(tup[i][0], tup[i][1]))
             cursor.execute("select remain from match where mno = '%s'"%(tup[i][0]))
             remain = cursor.fetchone()[0]
             cursor.execute("update match set remain ='%s' where mno='%s'"%(remain - tup[i][1],tup[i][0]))
-        print("insert into ticketdeal values ('%s', '%s', %d, '%s')"%(dno, date, sum, account))
-        cursor.execute("insert into ticketdeal values ('%s', '%s', %d, '%s')"%(dno, date, sum, account))
+        print("insert into ticketdeal values (LPAD(q_dno.currVal,8,0), '%s', %d, '%s')"%(date, sum, account))
         commit()
         return True
     except oracle.DatabaseError as e:

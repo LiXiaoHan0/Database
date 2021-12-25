@@ -612,10 +612,10 @@ def call_volunteer(): # 志愿管理页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("800x400")
+    form.geometry("800x390")
     heads1=[('用户账号','用户姓名'),(0,100,180)]
     heads2=[('用户账号','用户姓名','任务编号'),(0,100,180,240)]
-    heads3=[('任务编号','任务地点','任务详情'),(0,60,140,240)]
+    heads3=[('任务编号','任务地点','任务详情'),(0,80,160,260)]
     t_table1=table(frm,12,heads1,lambda n:volunteer_list(n))
     t_table2=table(frm,12,heads2,lambda n:volunteer_list(n))
     t_table3=table(frm,12,heads3,assignment_list)
