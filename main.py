@@ -4,7 +4,7 @@ from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-debug=3 # 调试模式，可以跳过登录界面
+debug=1 # 调试模式，可以跳过登录界面
 user_data=(-1,'0','无','无',0,('无','无')) # 用户信息
 # -1:账号不存在或密码错误；
 # 0:未申请为志愿者；
@@ -316,7 +316,7 @@ def update_ticket(n,table1,table2,label):
                 for i in chart1.get_children(): # 恢复
                     for j in chart2.selection():
                         if(chart1.set(i,"比赛项目")==chart2.set(j,"比赛项目")):
-                            chart1.set(i,"门票剩余",chart1.set(i,"门票剩余")+chart2.set(j,"购票数量"))
+                            chart1.set(i,"门票剩余",int(chart1.set(i,"门票剩余"))+int(chart2.set(j,"购票数量")))
                 table2.delete_data(1)
                 global ans
                 ans=0
@@ -331,7 +331,7 @@ def select_data(table1,table2,label): # 选择票务信息
         msg('err','提示','未选择任何信息！')
     elif(len(chart1.selection())>1):
         msg('err','提示','一次只能选择一条信息！')
-    elif(chart1.set(chart1.selection()[0],"门票剩余")==0):
+    elif(int(chart1.set(chart1.selection()[0],"门票剩余"))==0):
         msg('err','提示','该场次已没有余票！')
     else:
         def add_data(num):
@@ -340,35 +340,31 @@ def select_data(table1,table2,label): # 选择票务信息
                 global ans
                 ans=0 
                 for i in chart2.get_children(): 
-                    ans+=chart2.set(i,"金额小计")
-                label.configure(text="合计金额："+str(ans))
+                    ans+=int(chart2.set(i,"金额小计"))
+                label.configure(text="合计金额："+str("%.1d"%(ans)))
 
-            chart1.set(choice,"门票剩余",chart1.set(choice,"门票剩余")-num)
+            chart1.set(choice,"门票剩余",int(chart1.set(choice,"门票剩余"))-num)
             for i in chart2.get_children():
                 if(chart1.set(choice,"比赛项目")==chart2.set(i,"比赛项目")):
-                    chart2.set(i,"购票数量",chart2.set(i,"购票数量")+num)
-                    chart2.set(i,"金额小计",chart2.set(i,"购票数量")*chart1.set(choice,"门票价格"))
+                    chart2.set(i,"购票数量",int(chart2.set(i,"购票数量"))+num)
+                    chart2.set(i,"金额小计",int(chart2.set(i,"购票数量"))*int(chart1.set(choice,"门票价格")))
                     update_sum()
                     return
-            selection=[chart1.set(choice,"比赛编号"),chart1.set(choice,"比赛项目"),num,num*chart1.set(choice,"门票价格")]
+            selection=[chart1.set(choice,"比赛编号"),chart1.set(choice,"比赛项目"),num,num*int(chart1.set(choice,"门票价格"))]
             chart2.insert('',len(chart2.get_children()),values=selection)
             update_sum()
         choice=chart1.selection()[0]
-        print(chart1.set(choice,"门票剩余"))
-        order(frm,'选择购票数量','购票数量：',chart1.set(choice,"门票剩余"),add_data)
+        order(frm,'选择购票数量','购票数量：',int(chart1.set(choice,"门票剩余")),add_data)
 
 def finish_data(chart2,label): # 开始结账
+    global ans
+    the_data=[user_data[1], ans]
+    for i in chart2.get_children():
+        the_data.append((chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))))
+    print(the_data)
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何门票信息！')
-    elif(True):
-        global ans
-        the_data=[user_data[1], ans]
-        for i in chart2.get_children():
-            the_data.append((chart2.set(i,"比赛编号"),chart2.set(i,"购票数量")))
-        print(the_data)
-        print(the_data[1])
-        print(the_data[2][0])
-        ticket_deal(the_data)
+    elif(ticket_deal(the_data)):
         # !!! 给出购票信息，修改余票数量
         # 格式（比赛项目，购票数量，单项金额小计）
         msg('inf',"提示","购票成功！")
@@ -414,8 +410,8 @@ def supply_match_tickets(table):
         msg('err','提示','一次只能选择一条信息！')
     else:
         def add_tickets(n):
-            total=chart.set(chart.selection()[0],'总门票数')+n
-            remain=chart.set(chart.selection()[0],'门票剩余')+n
+            total=int(chart.set(chart.selection()[0],'总门票数'))+n
+            remain=int(chart.set(chart.selection()[0],'门票剩余'))+n
             if(supply_match_ticket(chart.set(chart.selection()[0],'比赛编号'),total,remain)):
                 chart.set(chart.selection()[0],'总门票数',total)
                 chart.set(chart.selection()[0],'门票剩余',remain)

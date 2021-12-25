@@ -63,7 +63,7 @@ def finish(flag): # 关闭连接
 #------------------------- 登录界面 ---------------------------
 
 def check(account, password):    # 登录检验
-    res = (inspect(account,'账号栏','int', 8))
+    res = (inspect(account,'int','账号栏', 8))
     if (res):
         return -1
     else:
@@ -212,6 +212,7 @@ def ticket_info(*arg):              # 获取票务信息
     try:
         cursor.execute("select mno, event, time, remain, price, vname from match, venue where match.venue = venue.vno")
         res = cursor.fetchall()
+        print(res)
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
@@ -226,17 +227,16 @@ def ticket_deal(tup, *arg):              # 购票结账
         dno = '00000001'
         for i in range (2, len(tup)):
             cursor.execute("insert into ticketsale values ('%s', '%s', %d)"%(dno, tup[i][0], tup[i][1]))
-            commit()
-            cursor.execute("select remain from match where mno = '%s'",tup[i][0])
-            remain = cursor.fetchone()
-            cursor.execute("update match set remain ='%s' ", remain - tup[i][1])
-            commit()
-        cursor.execute("insert into ticketdeal values ('%s', '%s', %d, '%s')", dno, date, sum, account)
+            cursor.execute("select remain from match where mno = '%s'"%(tup[i][0]))
+            remain = cursor.fetchone()[0]
+            cursor.execute("update match set remain ='%s' where mno='%s'"%(remain - tup[i][1],tup[i][0]))
+        print("insert into ticketdeal values ('%s', '%s', %d, '%s')"%(dno, date, sum, account))
+        cursor.execute("insert into ticketdeal values ('%s', '%s', %d, '%s')"%(dno, date, sum, account))
         commit()
-        return
+        return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        return True
+        return False
         
 # ------------------- 票务和物品管理部分 ------------------
 
