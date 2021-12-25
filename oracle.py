@@ -54,6 +54,9 @@ def connect(): # 连接数据库
 def commit(): # 提交修改
     conn.commit()
 
+def rollback(): # 回溯
+    conn.rollback()
+
 def finish(flag): # 关闭连接
     if(flag):
         cursor.close()
@@ -236,6 +239,7 @@ def ticket_deal(tup, *arg):              # 购票结账
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
         
 # ------------------- 票务和物品管理部分 ------------------
