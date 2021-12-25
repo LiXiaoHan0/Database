@@ -291,3 +291,15 @@ def shopping_history(account, *arg):
         return False
 
 
+#-----------------------------------------赛事信息-------------------------------------------------
+def match_info(*arg):              # 获取票务信息
+    try:
+        cursor.execute("select mno, event, time, total, remain, price, vname from match, venue where match.venue = venue.vno")
+        res = cursor.fetchall()
+        print(res)
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return ()
+
+
