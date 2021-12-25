@@ -206,19 +206,38 @@ def allocate_assignment(account,ANo):                # 给志愿者分配任务
         msg('err','错误',str(e))
         return True
 
-def ticket_info(*arg):              #获取票务信息
+# ------------------------- 票务信息部分 ------------------------------
+
+def ticket_info(*arg):              # 获取票务信息
     try:
-        cursor.execute("select mno, event, time, remain, price, vno from match, venue where match.venue = venue.vno")
+        cursor.execute("select mno, event, time, remain, price, vname from match, venue where match.venue = venue.vno")
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         return ()
 
-# def ticket_deal(*arg):              #购票结账
-#     try:
+def ticket_deal(tup, *arg):              # 购票结账
+    try:
+        sum = tup[1]
+        account = tup[0]
+        import time
+        date = time.strftime("%Y-%m-%d", time.localtime()) 
+        dno = '00000001'
+        for i in range (2, len(tup)):
+            cursor.execute("insert into ticketsale values ('%s', '%s', %d)"%(dno, tup[i][0], tup[i][1]))
+            commit()
+            cursor.execute("select remain from match where mno = '%s'",tup[i][0])
+            remain = cursor.fetchone()
+            cursor.execute("update match set remain ='%s' ", remain - tup[i][1])
+            commit()
+        cursor.execute("insert into ticketdeal values ('%s', '%s', %d, '%s')", dno, date, sum, account)
+        commit()
+        return
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return True
         
-
 # ------------------- 票务和物品管理部分 ------------------
 
 def supply_match_ticket(mno,total,remain):
@@ -248,3 +267,5 @@ def supply_match_item(ino,storage):
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         return False
+
+
