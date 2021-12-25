@@ -1,8 +1,8 @@
 from tkinter.constants import CHAR, FALSE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
-# import os
-# os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
+import os
+os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 
 
 # ------------------------ 通用函数 ----------------------
@@ -244,6 +244,16 @@ def ticket_deal(tup, *arg):              # 购票结账
         
 # ------------------- 票务和物品管理部分 ------------------
 
+def item_info(*arg):                            #商品信息
+    try:
+        cursor.execute("select * from item")
+        res = cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        rollback()
+        return False
+
 def supply_match_ticket(mno,total,remain):
     try:
         cursor.execute("update match set total=%d where mno='%s'"%(total,mno))
@@ -268,6 +278,15 @@ def supply_match_item(ino,storage):
         cursor.execute("update match set storage=%d where ino='%s'"%(storage,ino))
         commit()
         return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
+
+def shopping_history(account, *arg):
+    try:
+        cursor.execute("select * from ticketdeal where account = '%s'"%account)
+        res = cursor.fetchone()
+        return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         return False
