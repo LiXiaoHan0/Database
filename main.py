@@ -318,6 +318,7 @@ def update_ticket(n,table1,table2,label):
                         if(chart1.set(i,"比赛项目")==chart2.set(j,"比赛项目")):
                             chart1.set(i,"门票剩余",int(chart1.set(i,"门票剩余"))+int(chart2.set(j,"购票数量")))
                 table2.delete_data(1)
+                global ans
                 ans=0
                 for i in chart2.get_children(): 
                     ans+=int(chart2.set(i,"金额小计"))
@@ -336,6 +337,7 @@ def select_data(table1,table2,label): # 选择票务信息
         def add_data(num):
             print('购票数量为：'+str(num))
             def update_sum(): # 计算总金额
+                global ans
                 ans=0 
                 for i in chart2.get_children(): 
                     ans+=int(chart2.set(i,"金额小计"))
@@ -359,7 +361,10 @@ def finish_data(chart2,label): # 开始结账
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何门票信息！')
     elif(True):
-        the_data=[(chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))) for i in chart2.get_children()]
+        global ans
+        the_data=[ans]
+        for i in chart2.get_children():
+            the_data.append((chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))))
         print(the_data)
         # !!! 给出购票信息，修改余票数量
         # 格式（比赛项目，购票数量，单项金额小计）
@@ -373,6 +378,42 @@ def finish_data(chart2,label): # 开始结账
 def history_data(): # 查看历史信息
     print(user_data[1])
     # !!! 给出用户账号，返回用户历史订单信息
+
+
+# ------- 商品&票务管理 --------
+
+def ticket_manage_data(*arg):
+    return (('001','花样滑冰','2月12日12:00-12:30','30','10','30','冰立方'),)
+# !!! 获取比赛信息
+
+def item_manage_data(*arg):
+    return (('001','冰墩墩玩偶','20','100'),)
+# !!! 获取商品信息
+
+def new_matchs(table):
+    def add_tickets(n):
+        pass
+
+    order(frm,'选择增加门票数量','增加数量：',99,add_tickets)
+
+def supply_match_tickets(table):
+    chart=table.chart
+    if(len(chart.selection())==0):
+        msg('err','提示','未选择任何信息！')
+    elif(len(chart.selection())>1):
+        msg('err','提示','一次只能选择一条信息！')
+    else:
+
+        def add_tickets(n):
+            pass
+
+        order(frm,'选择增加门票数量','增加数量：',99,add_tickets)
+
+def new_items(table):
+    pass
+
+def supply_match_items(table):
+    pass
 
 
 # ------- 志愿管理页面 --------
@@ -514,27 +555,26 @@ def call_manager(): # 票务&商品管理页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("700x400")
-    heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,80,260,320,400)]
-    heads2=[('商品编号','商品名称','商品存量','商品价格'),(0,80,160,240)]
-    t_table1=table(frm,12,heads1,lambda:())
-    t_table2=table(frm,12,heads2,lambda:())
+    form.geometry("900x380")
+    heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,60,160,280,340,400,460,540)]
+    heads2=[('商品编号','商品名称','商品存量','商品价格'),(0,60,160,220,280)]
+    t_table1=table(frm,12,heads1,ticket_manage_data)
+    t_table2=table(frm,12,heads2,item_manage_data)
 
     t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
     t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)
     t_table2.chart.grid(row=1,column=4,columnspan=2,pady=5)
     t_table2.ybar.grid(row=1,column=6,sticky='ns',pady=5)
-    Label(frm,width=10).grid(row=0,column=3)
     Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
-    Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:()).grid(row=2,column=1,pady=10)
-    Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:()).grid(row=2,column=2,pady=10)
-    Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:()).grid(row=2,column=4,pady=10)
-    Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:()).grid(row=2,column=5,pady=10)
-
-    # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
-    # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
-    # t_table1.search_data() # 初始化票务信息
+    Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_items(t_table1)).grid(row=2,column=0,pady=10)
+    Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_match_tickets(t_table1)).grid(row=2,column=1,pady=10)
+    Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=10)
+    Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_match_items(t_table2)).grid(row=2,column=5,pady=10)
+    t_table1.chart.bind('<Double-1>',lambda event:supply_match_tickets(t_table1)) # 双击补充门票
+    t_table2.chart.bind('<Double-1>',lambda event:supply_match_items(t_table2)) # 双击补充物品
+    t_table1.search_data() # 初始化票务信息
+    t_table2.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
     pass
 
