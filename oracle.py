@@ -1,8 +1,8 @@
 from tkinter.constants import CHAR, FALSE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
-import os
-os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
+# import os
+# os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 
 
 # ------------------------ 通用函数 ----------------------
@@ -213,8 +213,38 @@ def ticket_info(*arg):              #获取票务信息
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        return True
+        return ()
 
-def ticket_deal(*arg):              #购票结账
+# def ticket_deal(*arg):              #购票结账
+#     try:
+        
+
+# ------------------- 票务和物品管理部分 ------------------
+
+def supply_match_ticket(mno,total,remain):
+    try:
+        cursor.execute("update match set total=%d where mno='%s'"%(total,mno))
+        cursor.execute("update match set remain=%d where mno='%s'"%(remain,mno))
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
+
+def add_new_item(iname,price,storage):
     try:
         
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False
+
+def supply_match_item(ino,storage):
+    try:
+        cursor.execute("update match set storage=%d where ino='%s'"%(storage,ino))
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return False

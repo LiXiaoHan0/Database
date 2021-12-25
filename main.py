@@ -184,7 +184,7 @@ class order: # 自定义数量单
             print(self.num.get())
             self.method(int(self.num.get()))
         else:
-            msg('err','提示','未选择购票数量！')
+            msg('err','提示','未选择数量！')
             self.form.focus_set()
         
 
@@ -316,12 +316,12 @@ def update_ticket(n,table1,table2,label):
                 for i in chart1.get_children(): # 恢复
                     for j in chart2.selection():
                         if(chart1.set(i,"比赛项目")==chart2.set(j,"比赛项目")):
-                            chart1.set(i,"门票剩余",int(chart1.set(i,"门票剩余"))+int(chart2.set(j,"购票数量")))
+                            chart1.set(i,"门票剩余",chart1.set(i,"门票剩余")+chart2.set(j,"购票数量"))
                 table2.delete_data(1)
                 global ans
                 ans=0
                 for i in chart2.get_children(): 
-                    ans+=int(chart2.set(i,"金额小计"))
+                    ans+=chart2.set(i,"金额小计")
                 label.configure(text="合计金额："+str(ans))
 
 def select_data(table1,table2,label): # 选择票务信息
@@ -331,7 +331,7 @@ def select_data(table1,table2,label): # 选择票务信息
         msg('err','提示','未选择任何信息！')
     elif(len(chart1.selection())>1):
         msg('err','提示','一次只能选择一条信息！')
-    elif(int(chart1.set(chart1.selection()[0],"门票剩余"))==0):
+    elif(chart1.set(chart1.selection()[0],"门票剩余")==0):
         msg('err','提示','该场次已没有余票！')
     else:
         def add_data(num):
@@ -340,17 +340,17 @@ def select_data(table1,table2,label): # 选择票务信息
                 global ans
                 ans=0 
                 for i in chart2.get_children(): 
-                    ans+=int(chart2.set(i,"金额小计"))
+                    ans+=chart2.set(i,"金额小计")
                 label.configure(text="合计金额："+str(ans))
 
-            chart1.set(choice,"门票剩余",int(chart1.set(choice,"门票剩余"))-num)
+            chart1.set(choice,"门票剩余",chart1.set(choice,"门票剩余")-num)
             for i in chart2.get_children():
                 if(chart1.set(choice,"比赛项目")==chart2.set(i,"比赛项目")):
-                    chart2.set(i,"购票数量",int(chart2.set(i,"购票数量"))+num)
-                    chart2.set(i,"金额小计",int(chart2.set(i,"购票数量"))*int(chart1.set(choice,"门票价格")))
+                    chart2.set(i,"购票数量",chart2.set(i,"购票数量")+num)
+                    chart2.set(i,"金额小计",chart2.set(i,"购票数量")*chart1.set(choice,"门票价格"))
                     update_sum()
                     return
-            selection=[chart1.set(choice,"比赛编号"),chart1.set(choice,"比赛项目"),num,num*int(chart1.set(choice,"门票价格"))]
+            selection=[chart1.set(choice,"比赛编号"),chart1.set(choice,"比赛项目"),num,num*chart1.set(choice,"门票价格")]
             chart2.insert('',len(chart2.get_children()),values=selection)
             update_sum()
         choice=chart1.selection()[0]
@@ -364,7 +364,7 @@ def finish_data(chart2,label): # 开始结账
         global ans
         the_data=[ans]
         for i in chart2.get_children():
-            the_data.append((chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))))
+            the_data.append((chart2.set(i,"比赛编号"),chart2.set(i,"购票数量")))
         print(the_data)
         # !!! 给出购票信息，修改余票数量
         # 格式（比赛项目，购票数量，单项金额小计）
@@ -391,10 +391,17 @@ def item_manage_data(*arg):
 # !!! 获取商品信息
 
 def new_matchs(table):
-    def add_tickets(n):
-        pass
+    class match_subform(subform):
 
-    order(frm,'选择增加门票数量','增加数量：',99,add_tickets)
+        def submit_data(self,*event): # 提交数据
+            self.get_data() # 刷新数据
+            if(True):
+                self.exit_form()
+            else:
+                self.form.focus_set()
+
+    match_subform(frm,'创建新的比赛项目',[('比赛项目','请输入比赛项目',0),('比赛日期','请输入比赛项目',0)])
+# sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,('男','女')),('密码：','请设置20字符以内密码',0),('确认密码：','请再次输入密码',0)])
 
 def supply_match_tickets(table):
     chart=table.chart
@@ -403,17 +410,41 @@ def supply_match_tickets(table):
     elif(len(chart.selection())>1):
         msg('err','提示','一次只能选择一条信息！')
     else:
-
         def add_tickets(n):
-            pass
-
+            total=chart.set(chart.selection()[0],'总门票数')+n
+            remain=chart.set(chart.selection()[0],'门票剩余')+n
+            if(supply_match_ticket(chart.set(chart.selection()[0],'比赛编号'),total,remain)):
+                chart.set(chart.selection()[0],'总门票数',total)
+                chart.set(chart.selection()[0],'门票剩余',remain)
+        
         order(frm,'选择增加门票数量','增加数量：',99,add_tickets)
 
 def new_items(table):
-    pass
+    class item_subform(subform):
+
+        def submit_data(self,*event): # 提交数据
+            self.get_data() # 刷新数据
+            print(self.vars[0],self.vars[1],self.vars[2])
+            if(add_new_item(self.vars[0],self.vars[1],self.vars[2])):
+                self.exit_form()
+            else:
+                self.form.focus_set()
+
+    item_subform(frm,'增加新的商品',[('商品名称','请输入商品名称',0),('商品价格','请输入商品价格',0),('商品存量','请输入现有商品存量',0)])
 
 def supply_match_items(table):
-    pass
+    chart=table.chart
+    if(len(chart.selection())==0):
+        msg('err','提示','未选择任何信息！')
+    elif(len(chart.selection())>1):
+        msg('err','提示','一次只能选择一条信息！')
+    else:
+        def add_items(n):
+            storage=chart.set(chart.selection()[0],'商品存量')+n
+            if(supply_match_item(chart.set(chart.selection()[0],'商品编号'),storage)):
+                chart.set(chart.selection()[0],'商品存量',storage)
+        
+        order(frm,'选择增加门票数量','增加数量：',99,add_items)
 
 
 # ------- 志愿管理页面 --------
