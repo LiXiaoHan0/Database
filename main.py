@@ -381,12 +381,12 @@ def history_data(): # 查看历史信息
 
 # ------- 商品&票务管理 --------
 
-def ticket_manage_data(*arg):
-    return (('001','花样滑冰','2月12日12:00-12:30','30','10','30','冰立方'),)
+# def ticket_manage_data(*arg):
+    # return (('001','花样滑冰','2月12日12:00-12:30','30','10','30','冰立方'),)
 # !!! 获取比赛信息
 
-def item_manage_data(*arg):
-    return (('001','冰墩墩玩偶','20','100'),)
+# def item_manage_data(*arg):
+    # return (('001','冰墩墩玩偶','20','100'),)
 # !!! 获取商品信息
 
 def new_matchs(table):
@@ -439,7 +439,7 @@ def supply_match_items(table):
         msg('err','提示','一次只能选择一条信息！')
     else:
         def add_items(n):
-            storage=chart.set(chart.selection()[0],'商品存量')+n
+            storage=int(chart.set(chart.selection()[0],'商品存量'))+n
             if(supply_match_item(chart.set(chart.selection()[0],'商品编号'),storage)):
                 chart.set(chart.selection()[0],'商品存量',storage)
         
@@ -588,7 +588,7 @@ def call_manager(): # 票务&商品管理页面
     heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,60,160,280,340,400,460,540)]
     heads2=[('商品编号','商品名称','商品存量','商品价格'),(0,60,160,220,280)]
     t_table1=table(frm,12,heads1,match_info)
-    t_table2=table(frm,12,heads2,item_manage_data)
+    t_table2=table(frm,12,heads2,item_info)
 
     t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
     t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)
