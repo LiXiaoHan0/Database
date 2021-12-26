@@ -99,7 +99,10 @@ class table: # 自定义表格
 
     def sort_column(self,col,way): # 表头排序
         tmp=self.chart
-        que=[(tmp.set(k,col),k) for k in tmp.get_children('')]
+        try:
+            que=[(int(tmp.set(k,col)),k) for k in tmp.get_children('')]
+        except:
+            que=[(tmp.set(k,col),k) for k in tmp.get_children('')]
         que.sort(reverse=way)
         for i,(val,k) in enumerate(que):
             tmp.move(k,'',i)
@@ -394,15 +397,16 @@ def new_matchs(table):
 
         def submit_data(self,*event): # 提交数据
             self.get_data() # 刷新数据
-            if(True):
+            print(self.vars)
+            if(add_new_match(self.vars[0],self.vars[1],self.vars[2],self.vars[3],self.vars[4],self.vars[5],self.vars[6])):
+                table.search_data()
                 self.exit_form()
             else:
                 self.form.focus_set()
 
-    match_subform(frm,'创建新的比赛项目',[('比赛项目','请输入比赛项目',0),('比赛日期','请输入比赛项目',0)])
-# sign_subform(login,'新用户注册',[('姓名：','请输入姓名',0),('年龄：','请输入年龄',0),('性别：','请选择性别',1,('男','女')),('密码：','请设置20字符以内密码',0),('确认密码：','请再次输入密码',0)])
+    match_subform(frm,'创建新的比赛项目',[('比赛项目','请输入比赛项目',0),('比赛月份','请选择比赛月份',1,list(range(1,13))),('比赛日期','请选择比赛日期',1,list(range(1,32))),('比赛时间','格式HH:MM-HH:MM',0),('门票数量','请输入门票单价',0),('门票单价','请输入门票单价',0),('比赛场馆','请选择比赛场馆',1,get_venue())])
 
-def supply_match_tickets(table):
+def supply_tickets(table):
     chart=table.chart
     if(len(chart.selection())==0):
         msg('err','提示','未选择任何信息！')
@@ -412,7 +416,7 @@ def supply_match_tickets(table):
         def add_tickets(n):
             total=int(chart.set(chart.selection()[0],'总门票数'))+n
             remain=int(chart.set(chart.selection()[0],'门票剩余'))+n
-            if(supply_match_ticket(chart.set(chart.selection()[0],'比赛编号'),total,remain)):
+            if(supply_ticket(chart.set(chart.selection()[0],'比赛编号'),total,remain)):
                 chart.set(chart.selection()[0],'总门票数',total)
                 chart.set(chart.selection()[0],'门票剩余',remain)
         
@@ -425,13 +429,14 @@ def new_items(table):
             self.get_data() # 刷新数据
             print(self.vars[0],self.vars[1],self.vars[2])
             if(add_new_item(self.vars[0],self.vars[1],self.vars[2])):
+                table.search_data()
                 self.exit_form()
             else:
                 self.form.focus_set()
 
     item_subform(frm,'增加新的商品',[('商品名称','请输入商品名称',0),('商品价格','请输入商品价格',0),('商品存量','请输入现有商品存量',0)])
 
-def supply_match_items(table):
+def supply_items(table):
     chart=table.chart
     if(len(chart.selection())==0):
         msg('err','提示','未选择任何信息！')
@@ -440,7 +445,7 @@ def supply_match_items(table):
     else:
         def add_items(n):
             storage=int(chart.set(chart.selection()[0],'商品存量'))+n
-            if(supply_match_item(chart.set(chart.selection()[0],'商品编号'),storage)):
+            if(supply_item(chart.set(chart.selection()[0],'商品编号'),storage)):
                 chart.set(chart.selection()[0],'商品存量',storage)
         
         order(frm,'补充商品数量','补充数量：',99,add_items)
@@ -569,8 +574,8 @@ def call_ticket(): # 票务页面
     Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8)
     Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
     Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data()).grid(row=4,column=3,columnspan=2,pady=8)
-    t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
-    t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
+    # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
+    # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
 
@@ -596,16 +601,15 @@ def call_manager(): # 票务&商品管理页面
     t_table2.ybar.grid(row=1,column=6,sticky='ns',pady=5)
     Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
-    Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_items(t_table1)).grid(row=2,column=0,pady=10)
-    Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_match_tickets(t_table1)).grid(row=2,column=1,pady=10)
+    Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_matchs(t_table1)).grid(row=2,column=0,pady=10)
+    Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_tickets(t_table1)).grid(row=2,column=1,pady=10)
     Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=10)
-    Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_match_items(t_table2)).grid(row=2,column=5,pady=10)
-    t_table1.chart.bind('<Double-1>',lambda event:supply_match_tickets(t_table1)) # 双击补充门票
-    t_table2.chart.bind('<Double-1>',lambda event:supply_match_items(t_table2)) # 双击补充物品
+    Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_items(t_table2)).grid(row=2,column=5,pady=10)
+    # t_table1.chart.bind('<Double-1>',lambda event:supply_tickets(t_table1)) # 双击补充门票
+    # t_table2.chart.bind('<Double-1>',lambda event:supply_items(t_table2)) # 双击补充物品
     t_table1.search_data() # 初始化票务信息
     t_table2.search_data() # 初始化票务信息
     frm.pack(padx=20,pady=20)
-    pass
 
 
 def call_volunteer(): # 志愿管理页面
@@ -613,8 +617,8 @@ def call_volunteer(): # 志愿管理页面
     global frm
     frm=Frame(form)
     form.geometry("800x390")
-    heads1=[('用户账号','用户姓名'),(0,100,180)]
-    heads2=[('用户账号','用户姓名','任务编号'),(0,100,180,240)]
+    heads1=[('用户账号','用户姓名'),(0,80,200)]
+    heads2=[('用户账号','用户姓名','任务编号'),(0,80,160,240)]
     heads3=[('任务编号','任务地点','任务详情'),(0,80,160,260)]
     t_table1=table(frm,12,heads1,lambda n:volunteer_list(n))
     t_table2=table(frm,12,heads2,lambda n:volunteer_list(n))

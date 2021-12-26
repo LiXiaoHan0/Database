@@ -1,8 +1,7 @@
-from tkinter.constants import CHAR, FALSE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
-import os
-os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
+# import os
+# os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 
 
 # ------------------------ 通用函数 ----------------------
@@ -38,6 +37,14 @@ def inspect(txt,var,pre,length,*limit): # 输入格式判断
         return True
     return False
 
+def check_time(month,day,time): # 检验时间
+    month_day=(31,28,31,30,31,30,31,31,30,31,30,31) # 月份及其对应的日期数
+    if(month_day[month-1]<day):
+        msg('err','错误','所选日期不存在，请重新选择！')
+        return False
+    if():
+        pass
+    return True
 
 # ----------------------- 数据库连接 ----------------------
 
@@ -100,6 +107,7 @@ def check(account, password):    # 登录检验
                         return res
         except oracle.DatabaseError as e:
             msg('err', '错误', str(e))
+            rollback()
             return -1
 
 def sign_in(name, age, sex, password, confirm):      # 提交注册
@@ -129,6 +137,7 @@ def sign_in(name, age, sex, password, confirm):      # 提交注册
             return True
         except oracle.DatabaseError as e:
             msg('err','错误',str(e))
+            rollback()
             return False
 
 def apply_volunteer(account):
@@ -138,66 +147,71 @@ def apply_volunteer(account):
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
 
 
 #----------------------------志愿管理部分-----------------------------------
 
-def get_venue():
+def get_venue():        # 获取所有场馆信息
     try:
         cursor.execute("select vname from venue")
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return ()
 
-def new_assign(detail,venue):
+def new_assign(detail,venue):       # 创建志愿任务
     try:
         cursor.execute("select vno from venue where vname='%s'"%(venue))
         res=cursor.fetchone()[0]
-        cursor.execute("insert into assign values(LPAD(q_assign.nextVal,8,0),'%s','%s')"%(detail,res))
-        cursor.execute("select q_assign.currVal from dual")
-        res=cursor.fetchone()[0]
+        cursor.execute("insert into assign values(LPAD(q_ano.nextVal,8,0),'%s','%s')"%(detail,res))
         commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
 
-def delete_assign(ano):
+def delete_assign(ano):             # 删除志愿任务
     try:
         cursor.execute("update VISITOR_VOLUNTEER set assign='' where assign='%s'"%(ano))
         cursor.execute("delete from assign where ano='%s'"%(ano))
         return False
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return True
 
-def volunteer_list(*arg):                  # 申请者或志愿者
+def volunteer_list(*arg):                  # 获取申请者或志愿者列表
     try:
         cursor.execute("select a.account,uname,assign from visitor_volunteer a,users b where state =%s and a.account=b.account"%arg)
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return ()
 
-def approve_volunteer(n,account):                     # 审批同意或拒绝
+def approve_volunteer(n,account):                     # 审批志愿者申请
     try:
         cursor.execute("update visitor_volunteer set state =%s where account = '%s'" %(n,account))
         return False
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return True
 
-def assignment_list(*arg):                            # 获取所有任务信息
+def assignment_list(*arg):                            # 获取所有志愿任务信息
     try:
         cursor.execute("select a.ano,vname,detail from assign a,venue b where a.venue=b.vno")
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return ()
 
 def allocate_assignment(account,ANo):                # 给志愿者分配任务
@@ -207,7 +221,9 @@ def allocate_assignment(account,ANo):                # 给志愿者分配任务
         return False
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return True
+
 
 # ------------------------- 票务信息部分 ------------------------------
 
@@ -215,10 +231,10 @@ def ticket_info(*arg):              # 获取票务信息
     try:
         cursor.execute("select mno, event, time, remain, price, vname from match, venue where match.venue = venue.vno")
         res = cursor.fetchall()
-        print(res)
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return ()
 
 def ticket_deal(tup, *arg):              # 购票结账
@@ -233,7 +249,6 @@ def ticket_deal(tup, *arg):              # 购票结账
             cursor.execute("select remain from match where mno = '%s'"%(tup[i][0]))
             remain = cursor.fetchone()[0]
             cursor.execute("update match set remain ='%s' where mno='%s'"%(remain - tup[i][1],tup[i][0]))
-        print("insert into ticketdeal values (LPAD(q_dno.currVal,8,0), '%s', %d, '%s')"%(date, sum, account))
         commit()
         return True
     except oracle.DatabaseError as e:
@@ -243,7 +258,7 @@ def ticket_deal(tup, *arg):              # 购票结账
         
 # ------------------- 票务和物品管理部分 ------------------
 
-def item_info(*arg):                            #商品信息
+def item_info(*arg):                            # 获取商品信息
     try:
         cursor.execute("select * from item")
         res = cursor.fetchall()
@@ -253,7 +268,7 @@ def item_info(*arg):                            #商品信息
         rollback()
         return False
 
-def supply_match_ticket(mno,total,remain):
+def supply_ticket(mno,total,remain):      # 补充门票数量
     try:
         cursor.execute("update match set total=%d where mno='%s'"%(total,mno))
         cursor.execute("update match set remain=%d where mno='%s'"%(remain,mno))
@@ -261,33 +276,39 @@ def supply_match_ticket(mno,total,remain):
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
 
-def add_new_item(iname,price,storage):
+def add_new_item(iname,price,storage):          # 创建新商品
     try:
-        
+        if(inspect(price,'int','商品价格',0,1,5) or inspect(storage,'int','商品存量',0,1,5)):
+            return False
+        cursor.execute("insert into item values(LPAD(q_ino.nextVal,3,0),'%s',%s,%s)"%(iname,price,storage))
         commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
 
-def supply_match_item(ino,storage):
+def supply_item(ino,storage):         # 补充商品数量
     try:
         cursor.execute("update item set storage=%d where ino='%s'"%(storage,ino))
         commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
 
-def shopping_history(account, *arg):
+def ticket_shopping_history(account, *arg):            # 购票历史记录
     try:
         cursor.execute("select * from ticketdeal where account = '%s'"%account)
         res = cursor.fetchone()
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return False
 
 
@@ -297,10 +318,25 @@ def match_info(*arg):              # 获取票务信息
     try:
         cursor.execute("select mno, event, time, total, remain, price, vname from match, venue where match.venue = venue.vno")
         res = cursor.fetchall()
-        print(res)
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
+        rollback()
         return ()
 
-
+def add_new_match(event,time,total,price,month,day,venue):                # 创建新的比赛
+    try:
+        if(inspect(price,'int','门票价格',0,1,5) or inspect(total,'int','门票总数',0,1,5)):
+            return False
+        if(check_time(int(month),int(day),time)):
+            return False
+        final_time=month+'月'+day+'日'+time
+        cursor.execute("select vno from venue where vname='%s'"%(venue))
+        res=cursor.fetchone()[0]
+        cursor.execute("insert into match values(LPAD(q_mno.nextVal,3,0),%s,%s,%s,%s,%s,%s)"%(event,final_time,total,total,price,res))
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        rollback()
+        return False
