@@ -381,12 +381,12 @@ def history_data(): # 查看历史信息
 
 # ------- 商品&票务管理 --------
 
-def ticket_manage_data(*arg):
-    return (('001','花样滑冰','2月12日12:00-12:30','30','10','30','冰立方'),)
+# def ticket_manage_data(*arg):
+    # return (('001','花样滑冰','2月12日12:00-12:30','30','10','30','冰立方'),)
 # !!! 获取比赛信息
 
-def item_manage_data(*arg):
-    return (('001','冰墩墩玩偶','20','100'),)
+# def item_manage_data(*arg):
+    # return (('001','冰墩墩玩偶','20','100'),)
 # !!! 获取商品信息
 
 def new_matchs(table):
