@@ -4,7 +4,7 @@ from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-debug=1 # 调试模式，可以跳过登录界面
+debug=3 # 调试模式，可以跳过登录界面
 user_data=(-1,'0','无','无',0,('无','无')) # 用户信息
 # -1:账号不存在或密码错误；
 # 0:未申请为志愿者；
@@ -416,7 +416,7 @@ def supply_match_tickets(table):
                 chart.set(chart.selection()[0],'总门票数',total)
                 chart.set(chart.selection()[0],'门票剩余',remain)
         
-        order(frm,'选择增加门票数量','增加数量：',99,add_tickets)
+        order(frm,'增加门票数量','增加数量：',99,add_tickets)
 
 def new_items(table):
     class item_subform(subform):
@@ -439,11 +439,11 @@ def supply_match_items(table):
         msg('err','提示','一次只能选择一条信息！')
     else:
         def add_items(n):
-            storage=chart.set(chart.selection()[0],'商品存量')+n
+            storage=int(chart.set(chart.selection()[0],'商品存量'))+n
             if(supply_match_item(chart.set(chart.selection()[0],'商品编号'),storage)):
                 chart.set(chart.selection()[0],'商品存量',storage)
         
-        order(frm,'选择增加门票数量','增加数量：',99,add_items)
+        order(frm,'补充商品数量','补充数量：',99,add_items)
 
 
 # ------- 志愿管理页面 --------
@@ -586,9 +586,9 @@ def call_manager(): # 票务&商品管理页面
     frm=Frame(form)
     form.geometry("900x390")
     heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,60,160,280,340,400,460,540)]
-    heads2=[('商品编号','商品名称','商品存量','商品价格'),(0,60,160,220,280)]
+    heads2=[('商品编号','商品名称','商品价格','商品存量'),(0,60,160,220,280)]
     t_table1=table(frm,12,heads1,match_info)
-    t_table2=table(frm,12,heads2,item_manage_data)
+    t_table2=table(frm,12,heads2,item_info)
 
     t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
     t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)

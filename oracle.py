@@ -274,7 +274,7 @@ def add_new_item(iname,price,storage):
 
 def supply_match_item(ino,storage):
     try:
-        cursor.execute("update match set storage=%d where ino='%s'"%(storage,ino))
+        cursor.execute("update item set storage=%d where ino='%s'"%(storage,ino))
         commit()
         return True
     except oracle.DatabaseError as e:
@@ -291,7 +291,8 @@ def shopping_history(account, *arg):
         return False
 
 
-#-----------------------------------------赛事信息-------------------------------------------------
+#---------------------------------赛事信息-------------------------------------------
+
 def match_info(*arg):              # 获取票务信息
     try:
         cursor.execute("select mno, event, time, total, remain, price, vname from match, venue where match.venue = venue.vno")
