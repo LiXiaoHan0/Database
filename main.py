@@ -324,7 +324,7 @@ def update_ticket(n,table1,table2,label):
                 global ans
                 ans=0
                 for i in chart2.get_children(): 
-                    ans+=chart2.set(i,"金额小计")
+                    ans+=int(chart2.set(i,"金额小计"))
                 label.configure(text="合计金额："+str(ans))
 
 def select_data(table1,table2,label): # 选择票务信息
@@ -398,7 +398,12 @@ def new_matchs(table):
         def submit_data(self,*event): # 提交数据
             self.get_data() # 刷新数据
             print(self.vars)
-            if(add_new_match(self.vars[0],self.vars[1],self.vars[2],self.vars[3],self.vars[4],self.vars[5],self.vars[6])):
+            for i in range(7):
+                if(self.vars[i]==''):
+                    msg('err','提示','信息未填写完整！')
+                    self.form.focus_set()
+                    return
+            if(add_new_match(self.vars[0],self.vars[1].replace('：',':'),self.vars[2],self.vars[3],self.vars[4],self.vars[5],self.vars[6])):
                 table.search_data()
                 self.exit_form()
             else:

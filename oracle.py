@@ -1,3 +1,4 @@
+from tkinter.constants import TRUE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
 # import os
@@ -38,13 +39,35 @@ def inspect(txt,var,pre,length,*limit): # 输入格式判断
     return False
 
 def check_time(month,day,time): # 检验时间
+    def change_num(c1,c2):
+        if(c1<'0' or c1>'9'):
+            return -1
+        elif(c2<'0' or c2>'9'):
+            return -1
+        else:
+            return int(c1)*10+int(c2)
+
     month_day=(31,28,31,30,31,30,31,31,30,31,30,31) # 月份及其对应的日期数
     if(month_day[month-1]<day):
         msg('err','错误','所选日期不存在，请重新选择！')
-        return False
-    if():
-        pass
-    return True
+        return True
+    if(len(time)!=11):
+        msg('err','错误','所填时间格式错误，要求“HH:MM-HH:MM”！')
+        return True
+    h1=change_num(time[0],time[1])
+    m1=change_num(time[3],time[4])
+    h2=change_num(time[6],time[7])
+    m2=change_num(time[9],time[10])
+    if(time[2]!=':' or time[8]!=':' or time[5]!='-' or h1<0 or m1<0 or h2<0 or m2<0):
+        msg('err','错误','所填时间格式错误，要求“HH:MM-HH:MM”！')
+        return True
+    if(h1>23 or m1>59 or h2>23 or m2>59):
+        msg('err','错误','所填时间不存在，请重新输入！')
+        return True
+    if(h1>h2 or (h1==h2 and m1>m2)):
+        msg('err','错误','起始时间大于结束时间，请重新输入！')
+        return True
+    return False
 
 # ----------------------- 数据库连接 ----------------------
 
@@ -285,6 +308,7 @@ def add_new_item(iname,price,storage):          # 创建新商品
             return False
         cursor.execute("insert into item values(LPAD(q_ino.nextVal,3,0),'%s',%s,%s)"%(iname,price,storage))
         commit()
+        msg('inf','提示','商品新建成功！')
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
@@ -330,11 +354,13 @@ def add_new_match(event,time,total,price,month,day,venue):                # 创�
             return False
         if(check_time(int(month),int(day),time)):
             return False
+        print(time)
         final_time=month+'月'+day+'日'+time
         cursor.execute("select vno from venue where vname='%s'"%(venue))
         res=cursor.fetchone()[0]
-        cursor.execute("insert into match values(LPAD(q_mno.nextVal,3,0),%s,%s,%s,%s,%s,%s)"%(event,final_time,total,total,price,res))
+        cursor.execute("insert into match values(LPAD(q_mno.nextVal,3,0),'%s','%s',%s,%s,%s,'%s')"%(event,final_time,total,total,price,res))
         commit()
+        msg('inf','提示','赛事新建成功！')
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
