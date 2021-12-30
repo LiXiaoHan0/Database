@@ -130,7 +130,6 @@ def check(account, password):    # 登录检验
                         return res
         except oracle.DatabaseError as e:
             msg('err', '错误', str(e))
-            rollback()
             return -1
 
 def sign_in(name, age, sex, password, confirm):      # 提交注册
@@ -183,7 +182,6 @@ def get_venue():        # 获取所有场馆信息
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        rollback()
         return ()
 
 def new_assign(detail,venue):       # 创建志愿任务
@@ -215,7 +213,6 @@ def volunteer_list(*arg):                  # 获取申请者或志愿者列表
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        rollback()
         return ()
 
 def approve_volunteer(n,account):                     # 审批志愿者申请
@@ -234,7 +231,6 @@ def assignment_list(*arg):                            # 获取所有志愿任务
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        rollback()
         return ()
 
 def allocate_assignment(account,ANo):                # 给志愿者分配任务
@@ -257,7 +253,6 @@ def ticket_info(*arg):              # 获取票务信息
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        rollback()
         return ()
 
 def ticket_deal(tup, *arg):              # 购票结账
@@ -266,16 +261,44 @@ def ticket_deal(tup, *arg):              # 购票结账
         account = tup[0]
         cursor.execute("insert into ticketdeal values (LPAD(q_dno.nextVal,8,0),sysdate,%d,'%s')"%(sum,account))
         for i in range (2, len(tup)):
-            cursor.execute("insert into ticketsale values (LPAD(q_dno.currVal,8,0), '%s', %d)"%(tup[i][0],tup[i][1]))
-            cursor.execute("select remain from match where mno = '%s'"%(tup[i][0]))
+            cursor.execute("insert into ticketsale values (LPAD(q_dno.currVal,8,0),'%s',%d,%d)"%(tup[i][0],tup[i][1],tup[i][2]))
+            cursor.execute("select remain from match where mno ='%s'"%(tup[i][0]))
             remain = cursor.fetchone()[0]
-            cursor.execute("update match set remain =%d where mno='%s'"%(remain-tup[i][1],tup[i][0]))
+            cursor.execute("update match set remain=%d where mno='%s'"%(remain-tup[i][1],tup[i][0]))
         commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         rollback()
         return False
+
+
+# ----------------- 查询历史记录相关 -------------------
+
+def deal_data(n,account): # 查看历史记录
+    try:
+        if(n==1):
+            cursor.execute("select dno,time,sum from ticketdeal where account='%s'"%(account))
+        elif(n==2):
+            cursor.execute("select dno,time,sum from itemdeal where account='%s'"%(account))
+        res=cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return ()
+
+def sale_data(n,dno): # 订单详情
+    try:
+        if(n==1):
+            cursor.execute("select event,quantity,sum from match a,ticketsale b where a.mno=b.mno and dno='%s'"%(dno))
+        elif(n==2):
+            cursor.execute("select iname,quantity,sum from item a,itemsale b where a.ino=b.ino and dno='%s'"%(dno))
+        res=cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        return ()
+
 
 # ------------------------- 商品信息部分 ------------------------------
 
@@ -286,8 +309,7 @@ def item_info(*arg):                            # 获取商品信息
         return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
-        rollback()
-        return False
+        return ()
 
 def item_deal(tup,*arg):                        # 购物结账
     try:
@@ -295,10 +317,10 @@ def item_deal(tup,*arg):                        # 购物结账
         account = tup[0]
         cursor.execute("insert into itemdeal values (LPAD(q_dno.nextVal,8,0),sysdate,%d,'%s')"%(sum,account))
         for i in range (2, len(tup)):
-            cursor.execute("insert into itemsale values (LPAD(q_dno.currVal,8,0), '%s', %d)"%(tup[i][0],tup[i][1]))
-            cursor.execute("select storage from item where ino ='%s'"%(tup[i][0]))
+            cursor.execute("insert into itemsale values (LPAD(q_dno.currVal,8,0),'%s',%d,%d)"%(tup[i][0],tup[i][1],tup[i][2]))
+            cursor.execute("select storage from item where ino='%s'"%(tup[i][0]))
             storage = cursor.fetchone()[0]
-            cursor.execute("update item set storage =%d where ino='%s'"%(storage-tup[i][1],tup[i][0]))
+            cursor.execute("update item set storage=%d where ino='%s'"%(storage-tup[i][1],tup[i][0]))
         commit()
         return True
     except oracle.DatabaseError as e:
@@ -339,16 +361,6 @@ def supply_item(ino,storage):         # 补充商品数量
         cursor.execute("update item set storage=%d where ino='%s'"%(storage,ino))
         commit()
         return True
-    except oracle.DatabaseError as e:
-        msg('err','错误',str(e))
-        rollback()
-        return False
-
-def ticket_shopping_history(account, *arg):            # 购票历史记录
-    try:
-        cursor.execute("select * from ticketdeal where account = '%s'"%account)
-        res = cursor.fetchone()
-        return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         rollback()

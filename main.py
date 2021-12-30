@@ -277,6 +277,48 @@ def clear(): # 清除页面布局
     global frm
     frm.destroy()
 
+def deal_detail(father,n): # 历史订单信息
+
+    def sale_detail(father,chart,n): # 订单详细信息
+        if(len(chart.selection())==0):
+            msg('err','提示','未选择任何订单！')
+            father.focus_set()
+        elif(len(chart.selection())>1):
+            msg('err','提示','一次只能选择一个订单！')
+            father.focus_set()
+        else:
+            dno=chart.set(chart.selection()[0],'订单编号')
+            sum=chart.set(chart.selection()[0],'合计金额')
+            form=Toplevel(father)
+            form.title("订单详细信息")
+            form.geometry("320x280")
+            if(n==1):
+                heads=[('比赛项目','购票数量','金额小计'),(0,100,160,240)]
+            elif(n==2):
+                heads=[('商品名称','购买数量','金额小计'),(0,100,160,240)]
+
+            frm=Frame(form)
+            i_table=table(frm,8,heads,lambda tmp:sale_data(n,dno))
+            i_table.son.grid(row=0,column=0,columnspan=2,pady=10)
+            Button(frm,text="关闭",width=10,font=('SimHei',12),command=form.destroy).grid(row=1,column=1,pady=5)
+            Label(frm,text="合计金额："+sum,width=16,font=('SimHei',12)).grid(row=1,column=0,pady=5)
+            frm.pack(pady=5,padx=5)
+            i_table.search_data()
+
+    form=Toplevel(father)
+    text=('购票历史信息','购物历史信息')
+    form.title(text[n-1])
+    form.geometry("380x320")
+    heads=[('订单编号','下单时间','合计金额'),(0,80,220,320)]
+
+    frm=Frame(form)
+    i_table=table(frm,10,heads,lambda tmp:deal_data(n,user_data[1]))
+    i_table.son.grid(row=0,column=0,columnspan=2,pady=10)
+    Button(frm,text="关闭",width=10,font=('SimHei',12),command=form.destroy).grid(row=1,column=0,pady=5)
+    Button(frm,text="查看",width=10,font=('SimHei',12),command=lambda:sale_detail(father,i_table.chart,n)).grid(row=1,column=1,pady=5)
+    frm.pack(pady=5,padx=5)
+    i_table.search_data()
+
 
 # ------- 个人信息页面 --------
 
@@ -371,7 +413,7 @@ def finish_ticket(chart2,label): # 开始结账
     global ans
     the_data=[user_data[1], ans]
     for i in chart2.get_children():
-        the_data.append((chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量"))))
+        the_data.append((chart2.set(i,"比赛编号"),int(chart2.set(i,"购票数量")),int(chart2.set(i,"金额小计"))))
     print(the_data)
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何门票信息！')
@@ -382,10 +424,6 @@ def finish_ticket(chart2,label): # 开始结账
     else:
         msg('err',"提示","订单提交失败，请稍后重试！")
         call_ticket()
-
-def history_ticket(): # 查看历史信息
-    print(user_data[1])
-    # !!! 给出用户账号，返回用户历史订单信息
 
 
 # --------- 购物页面 -----------
@@ -461,13 +499,11 @@ def finish_item(chart2,label): # 开始结账
     global ans
     the_data=[user_data[1], ans]
     for i in chart2.get_children():
-        the_data.append((chart2.set(i,"商品编号"),int(chart2.set(i,"购买数量"))))
+        the_data.append((chart2.set(i,"商品编号"),int(chart2.set(i,"购买数量")),int(chart2.set(i,"金额小计"))))
     print(the_data)
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何商品信息！')
     elif(item_deal(the_data)):
-        # !!! 给出购票信息，修改余票数量
-        # 格式（比赛项目，购票数量，单项金额小计）
         msg('inf',"提示","购买成功！")
         label.configure(text="合计金额：0")
         call_item()
@@ -475,9 +511,6 @@ def finish_item(chart2,label): # 开始结账
         msg('err',"提示","订单提交失败，请稍后重试！")
         call_item()
 
-def history_item(): # 查看历史信息
-    print(user_data[1])
-    # !!! 给出用户账号，返回用户历史订单信息
 
 # ------- 商品&票务管理 --------
 
@@ -658,15 +691,15 @@ def call_ticket(): # 票务页面
 
     t_table1.son.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
     t_table2.son.grid(row=1,column=3,columnspan=2,pady=5)
-    l_sum.grid(row=2,column=3,pady=5)
+    l_sum.grid(row=2,column=3,pady=3)
     Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
     Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
-    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_ticket(t_table2.chart,l_sum)).grid(row=2,column=4,pady=5)
+    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_ticket(t_table2.chart,l_sum)).grid(row=2,column=4,pady=3)
     Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=5)
-    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=5)
+    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=10)
     Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=5)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_ticket(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=5)
-    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_ticket()).grid(row=4,column=3,columnspan=2,pady=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_ticket(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=10)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:deal_detail(form,1)).grid(row=4,column=3,columnspan=2,pady=10)
     # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
     # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
@@ -686,15 +719,15 @@ def call_item(): # 商品页面
 
     t_table1.son.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
     t_table2.son.grid(row=1,column=3,columnspan=2,pady=5)
-    l_sum.grid(row=2,column=3,pady=5)
+    l_sum.grid(row=2,column=3,pady=3)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
     Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
-    Button(frm,text="确定购买",width=12,font=('SimHei',12),command=lambda:finish_item(t_table2.chart,l_sum)).grid(row=2,column=4,pady=5)
+    Button(frm,text="确定购买",width=12,font=('SimHei',12),command=lambda:finish_item(t_table2.chart,l_sum)).grid(row=2,column=4,pady=3)
     Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_item(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=5)
-    Button(frm,text="刷新商品信息",width=12,font=('SimHei',12),command=lambda:update_item(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=5)
+    Button(frm,text="刷新商品信息",width=12,font=('SimHei',12),command=lambda:update_item(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=10)
     Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_item(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=5)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_item(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=5)
-    Button(frm,text="查看购物历史",width=12,font=('SimHei',12),command=lambda:history_item()).grid(row=4,column=3,columnspan=2,pady=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_item(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=10)
+    Button(frm,text="查看购物历史",width=12,font=('SimHei',12),command=lambda:deal_detail(form,2)).grid(row=4,column=3,columnspan=2,pady=10)
     # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
     # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
