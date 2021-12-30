@@ -230,7 +230,7 @@ def sign_data(): # 注册界面
 # ------------------------- 登录界面布局 -----------------------------
 
 login=root
-login.title("北京冬奥会信息管理系统：登录界面")            #账号输入框可以加一句提示：请输入8位数字账号
+login.title("北京冬奥会信息管理系统：登录界面")
 login.geometry("450x250+"+str((screen_x-450)//2)+"+"+str((screen_y-250)//2))
 login.resizable(width=False, height=False)
 
@@ -281,7 +281,9 @@ def clear(): # 清除页面布局
 # ------- 个人信息页面 --------
 
 def apply_volunteers(): # 申请成为志愿者
-    if(apply_volunteer(user_data[1])):
+    if(user_data[0]==1):
+        msg('inf','提示','申请已提交，请等待管理员审批通过！')
+    elif(apply_volunteer(user_data[1])):
         user_data[0]=1
         call_info()
         msg('inf','提示','申请提交成功！')
@@ -291,6 +293,9 @@ def show_volunteer(): # 查看志愿任务分配
         msg('inf','志愿任务查看','您分配到的场馆为'+user_data[5][0]+'，您负责的工作是'+user_data[5][1]+'。')
     else:
         msg('inf','您还没有被分配具体任务！')
+
+def quit_account(form): # 退出登录
+    form.destroy()
 
 
 # ------- 订票业务页面 --------
@@ -539,6 +544,8 @@ def supply_items(table):
         
         order(frm,'补充商品数量','补充数量：',99,add_items)
 
+def summary_data():
+    pass
 
 # ------- 志愿管理页面 --------
 
@@ -623,19 +630,18 @@ def call_info(): # 个人信息页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("480x280")
+    form.geometry("480x270")
     power=['群众','群众','志愿者','管理员']
 
-    Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=4,padx=40)
+    Label(frm,width=160,height=160,image=user_pic).grid(row=0,column=0,rowspan=5,padx=40)
     for i,txt in enumerate(('账号：','姓名：','性别：','年龄：')):
-        Label(frm,text=txt + str(user_data[i+1]),font=('SimHei',16),width=16,anchor=NW).grid(row=i,column=1,columnspan=2,pady=5)          
-    Label(frm,text="您的身份是："+power[user_data[0]],font=('SimHei',16)).grid(row=4,column=0,pady=25)
-    if(user_data[0]==0):
-        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',15),command=apply_volunteers).grid(row=4,column=1,columnspan=2,pady=25)
-    elif(user_data[0]==1):
-        Label(frm,text="志愿申请已提交",font=('SimHei',15)).grid(row=4,column=1,columnspan=2,pady=25)
+        Label(frm,text=txt + str(user_data[i+1]),font=('SimHei',16),width=16,anchor=NW).grid(row=i,column=1,pady=3)          
+    Label(frm,text="权限："+power[user_data[0]],font=('SimHei',16),width=16,anchor=NW).grid(row=4,column=1,pady=3)
+    if(user_data[0]==0 or user_data[0]==1):
+        Button(frm,text="申请成为志愿者",width=16,font=('SimHei',14),command=apply_volunteers).grid(row=5,column=0,pady=20)
     elif(user_data[0]==2):
-        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',15),command=show_volunteer).grid(row=4,column=1,columnspan=2,pady=25)  
+        Button(frm,text="查看志愿任务分配",width=16,font=('SimHei',14),command=show_volunteer).grid(row=5,column=0,pady=20)
+    Button(frm,text="退出登录",width=12,font=('SimHei',14),command=lambda:quit_account(form)).grid(row=5,column=1,pady=20)
     frm.pack(padx=20,pady=20)
 
 
@@ -705,12 +711,13 @@ def call_manager(): # 票务&商品管理页面
     t_table1=table(frm,12,heads1,match_info)
     t_table2=table(frm,12,heads2,item_info)
 
-    t_table1.son.grid(row=1,column=0,columnspan=2,pady=5)
-    t_table2.son.grid(row=1,column=4,columnspan=2,pady=5)
+    t_table1.son.grid(row=1,column=0,columnspan=3,pady=5)
+    t_table2.son.grid(row=1,column=4,columnspan=3,pady=5)
     Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
     Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_matchs(t_table1)).grid(row=2,column=0,pady=5)
     Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_tickets(t_table1)).grid(row=2,column=1,pady=5)
+    Button(frm,text="统计信息",width=12,font=('SimHei',12),command=summary_data).grid(row=2,column=2,pady=5)
     Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=5)
     Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_items(t_table2)).grid(row=2,column=5,pady=5)
     # t_table1.chart.bind('<Double-1>',lambda event:supply_tickets(t_table1)) # 双击补充门票
@@ -765,8 +772,8 @@ if(user_data[0]>=0):
         option.add_command(label =" 订票服务 ",command=call_ticket)
         option.add_command(label =" 购买商品 ",command=call_item)
     else:
-        option.add_command(label =" 票务&商品管理 ",command=call_manager)
         option.add_command(label =" 志愿管理 ",command=call_volunteer)
+        option.add_command(label =" 票务&商品管理 ",command=call_manager)
     form.config(menu=option)
 
     call_info()
