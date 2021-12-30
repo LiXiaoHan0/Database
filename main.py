@@ -88,14 +88,21 @@ class table: # 自定义表格
     def __init__(self,father,num,heads,method): # 初始化
         self.data=[]
         self.far=father
+        self.son=Frame(father)
         self.heads=heads
         self.search=method
-        self.ybar=Scrollbar(father,orient='vertical')
-        self.chart=ttk.Treeview(father,height=num,show="headings",columns=heads[0],yscrollcommand=self.ybar.set)
-        self.ybar['command']=self.chart.yview
+        xbar=Scrollbar(self.son,orient='horizontal')
+        ybar=Scrollbar(self.son,orient='vertical')
+        self.chart=ttk.Treeview(self.son,height=num,show="headings",columns=heads[0],xscrollcommand=xbar.set,yscrollcommand=ybar.set)
+        xbar['command']=self.chart.xview
+        ybar['command']=self.chart.yview
         for i,val in enumerate(heads[0]): # 设置表头
-            self.chart.column(val,width=heads[1][i+1]-heads[1][i],anchor="center")
+            tmp_width=heads[1][i+1]-heads[1][i]
+            self.chart.column(val,width=tmp_width,minwidth=tmp_width,anchor="center")
             self.chart.heading(val,text=val,command=lambda _val=val:self.sort_column(_val,False))
+        xbar.pack(side=BOTTOM,fill=X)
+        ybar.pack(side=RIGHT,fill=Y)
+        self.chart.pack(fill=BOTH,expand=True)
 
     def sort_column(self,col,way): # 表头排序
         tmp=self.chart
@@ -288,10 +295,6 @@ def show_volunteer(): # 查看志愿任务分配
 
 # ------- 订票业务页面 --------
 
-# def ticket_data(*arg): # 获取票务信息
-    # !!! 格式：'比赛项目','比赛时间','门票剩余','门票价格（元）','比赛地点'，例如：
-    # return (('1','跳台滑雪','2月25日09:00-10:00','20','100','滑雪大跳台'),('1','高山滑雪','2月26日19:00-20:00','50','80','滑雪大跳台'),('1','花样滑冰','2月28日15:00-16:00','0','80','冰立方'))
-
 def update_ticket(n,table1,table2,label):
     def clear_all():
         table1.search_data()
@@ -473,14 +476,6 @@ def history_item(): # 查看历史信息
 
 # ------- 商品&票务管理 --------
 
-# def ticket_manage_data(*arg):
-    # return (('001','花样滑冰','2月12日12:00-12:30','30','10','30','冰立方'),)
-# !!! 获取比赛信息
-
-# def item_manage_data(*arg):
-    # return (('001','冰墩墩玩偶','20','100'),)
-# !!! 获取商品信息
-
 def new_matchs(table):
     class match_subform(subform):
 
@@ -655,19 +650,17 @@ def call_ticket(): # 票务页面
     t_table2=table(frm,8,heads2,lambda:())
     l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
 
-    t_table1.chart.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
-    t_table1.ybar.grid(row=1,column=2,rowspan=3,sticky='ns',pady=5)
-    t_table2.chart.grid(row=1,column=3,columnspan=2,pady=10)
-    t_table2.ybar.grid(row=1,column=5,sticky='ns',pady=10)
-    l_sum.grid(row=2,column=3,pady=8)
+    t_table1.son.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
+    t_table2.son.grid(row=1,column=3,columnspan=2,pady=5)
+    l_sum.grid(row=2,column=3,pady=5)
     Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
     Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
-    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_ticket(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8)
-    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=8)
-    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=8)
-    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_ticket(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
-    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_ticket()).grid(row=4,column=3,columnspan=2,pady=8)
+    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_ticket(t_table2.chart,l_sum)).grid(row=2,column=4,pady=5)
+    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=5)
+    Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=5)
+    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_ticket(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=5)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_ticket()).grid(row=4,column=3,columnspan=2,pady=5)
     # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
     # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
@@ -685,19 +678,17 @@ def call_item(): # 商品页面
     t_table2=table(frm,8,heads2,lambda:())
     l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
 
-    t_table1.chart.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
-    t_table1.ybar.grid(row=1,column=2,rowspan=3,sticky='ns',pady=5)
-    t_table2.chart.grid(row=1,column=3,columnspan=2,pady=10)
-    t_table2.ybar.grid(row=1,column=5,sticky='ns',pady=10)
-    l_sum.grid(row=2,column=3,pady=8)
+    t_table1.son.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
+    t_table2.son.grid(row=1,column=3,columnspan=2,pady=5)
+    l_sum.grid(row=2,column=3,pady=5)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
     Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
-    Button(frm,text="确定购买",width=12,font=('SimHei',12),command=lambda:finish_item(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8)
-    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_item(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=8)
-    Button(frm,text="刷新商品信息",width=12,font=('SimHei',12),command=lambda:update_item(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=8)
-    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_item(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_item(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
-    Button(frm,text="查看购物历史",width=12,font=('SimHei',12),command=lambda:history_item()).grid(row=4,column=3,columnspan=2,pady=8)
+    Button(frm,text="确定购买",width=12,font=('SimHei',12),command=lambda:finish_item(t_table2.chart,l_sum)).grid(row=2,column=4,pady=5)
+    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_item(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=5)
+    Button(frm,text="刷新商品信息",width=12,font=('SimHei',12),command=lambda:update_item(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=5)
+    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_item(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=5)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_item(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=5)
+    Button(frm,text="查看购物历史",width=12,font=('SimHei',12),command=lambda:history_item()).grid(row=4,column=3,columnspan=2,pady=5)
     # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
     # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
@@ -708,22 +699,20 @@ def call_manager(): # 票务&商品管理页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("900x390")
+    form.geometry("900x400")
     heads1=[('比赛编号','比赛项目','比赛时间','总门票数','门票剩余','门票价格','比赛地点'),(0,60,160,280,340,400,460,540)]
     heads2=[('商品编号','商品名称','商品价格','商品存量'),(0,60,160,220,280)]
     t_table1=table(frm,12,heads1,match_info)
     t_table2=table(frm,12,heads2,item_info)
 
-    t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
-    t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)
-    t_table2.chart.grid(row=1,column=4,columnspan=2,pady=5)
-    t_table2.ybar.grid(row=1,column=6,sticky='ns',pady=5)
+    t_table1.son.grid(row=1,column=0,columnspan=2,pady=5)
+    t_table2.son.grid(row=1,column=4,columnspan=2,pady=5)
     Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
-    Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_matchs(t_table1)).grid(row=2,column=0,pady=10)
-    Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_tickets(t_table1)).grid(row=2,column=1,pady=10)
-    Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=10)
-    Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_items(t_table2)).grid(row=2,column=5,pady=10)
+    Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_matchs(t_table1)).grid(row=2,column=0,pady=5)
+    Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_tickets(t_table1)).grid(row=2,column=1,pady=5)
+    Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=5)
+    Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_items(t_table2)).grid(row=2,column=5,pady=5)
     # t_table1.chart.bind('<Double-1>',lambda event:supply_tickets(t_table1)) # 双击补充门票
     # t_table2.chart.bind('<Double-1>',lambda event:supply_items(t_table2)) # 双击补充物品
     t_table1.search_data() # 初始化票务信息
@@ -735,7 +724,7 @@ def call_volunteer(): # 志愿管理页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("800x390")
+    form.geometry("800x400")
     heads1=[('用户账号','用户姓名'),(0,80,200)]
     heads2=[('用户账号','用户姓名','任务编号'),(0,80,160,240)]
     heads3=[('任务编号','任务地点','任务详情'),(0,80,160,260)]
@@ -743,20 +732,17 @@ def call_volunteer(): # 志愿管理页面
     t_table2=table(frm,12,heads2,lambda n:volunteer_list(n))
     t_table3=table(frm,12,heads3,assignment_list)
 
-    t_table1.chart.grid(row=1,column=0,columnspan=2,pady=5)
-    t_table1.ybar.grid(row=1,column=2,sticky='ns',pady=5)
-    t_table2.chart.grid(row=1,column=4,pady=5)
-    t_table2.ybar.grid(row=1,column=5,sticky='ns',pady=5)
-    t_table3.chart.grid(row=1,column=7,columnspan=2,pady=5)
-    t_table3.ybar.grid(row=1,column=9,sticky='ns',pady=5)
+    t_table1.son.grid(row=1,column=0,columnspan=2,pady=5)
+    t_table2.son.grid(row=1,column=4,pady=5)
+    t_table3.son.grid(row=1,column=7,columnspan=2,pady=5)
     Label(frm,text="申请人信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
     Label(frm,text="志愿者信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=2)
     Label(frm,text="志愿任务信息",font=('SimHei',16)).grid(row=0,column=6,columnspan=3)
-    Button(frm,text="审批通过",width=10,font=('SimHei',12),command=lambda:check_volunteers(2,t_table1,t_table2)).grid(row=2,column=0,pady=10)
-    Button(frm,text="审批拒绝",width=10,font=('SimHei',12),command=lambda:check_volunteers(0,t_table1,t_table2)).grid(row=2,column=1,pady=10)
-    Button(frm,text="分配任务",width=10,font=('SimHei',12),command=lambda:allocate_assigns(t_table2,t_table3)).grid(row=2,column=4,pady=10)
-    Button(frm,text="新建任务",width=10,font=('SimHei',12),command=lambda:new_assigns(t_table3)).grid(row=2,column=7,pady=10)
-    Button(frm,text="删除任务",width=10,font=('SimHei',12),command=lambda:delete_assigns(t_table2,t_table3)).grid(row=2,column=8,pady=10)
+    Button(frm,text="审批通过",width=10,font=('SimHei',12),command=lambda:check_volunteers(2,t_table1,t_table2)).grid(row=2,column=0,pady=5)
+    Button(frm,text="审批拒绝",width=10,font=('SimHei',12),command=lambda:check_volunteers(0,t_table1,t_table2)).grid(row=2,column=1,pady=5)
+    Button(frm,text="分配任务",width=10,font=('SimHei',12),command=lambda:allocate_assigns(t_table2,t_table3)).grid(row=2,column=4,pady=5)
+    Button(frm,text="新建任务",width=10,font=('SimHei',12),command=lambda:new_assigns(t_table3)).grid(row=2,column=7,pady=5)
+    Button(frm,text="删除任务",width=10,font=('SimHei',12),command=lambda:delete_assigns(t_table2,t_table3)).grid(row=2,column=8,pady=5)
     t_table1.search_data(1)
     t_table2.search_data(2)
     t_table3.search_data()
