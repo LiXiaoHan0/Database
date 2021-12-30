@@ -318,7 +318,7 @@ def update_ticket(n,table1,table2,label):
                 chart2=table2.chart
                 for i in chart1.get_children(): # 恢复
                     for j in chart2.selection():
-                        if(chart1.set(i,"比赛项目")==chart2.set(j,"比赛项目")):
+                        if(chart1.set(i,"比赛编号")==chart2.set(j,"比赛编号")):
                             chart1.set(i,"门票剩余",int(chart1.set(i,"门票剩余"))+int(chart2.set(j,"购票数量")))
                 table2.delete_data(1)
                 global ans
@@ -327,7 +327,7 @@ def update_ticket(n,table1,table2,label):
                     ans+=int(chart2.set(i,"金额小计"))
                 label.configure(text="合计金额："+str(ans))
 
-def select_data(table1,table2,label): # 选择票务信息
+def select_ticket(table1,table2,label): # 选择票务信息
     chart1=table1.chart
     chart2=table2.chart
     if(len(chart1.selection())==0):
@@ -348,7 +348,7 @@ def select_data(table1,table2,label): # 选择票务信息
 
             chart1.set(choice,"门票剩余",int(chart1.set(choice,"门票剩余"))-num)
             for i in chart2.get_children():
-                if(chart1.set(choice,"比赛项目")==chart2.set(i,"比赛项目")):
+                if(chart1.set(choice,"比赛编号")==chart2.set(i,"比赛编号")):
                     chart2.set(i,"购票数量",int(chart2.set(i,"购票数量"))+num)
                     chart2.set(i,"金额小计",int(chart2.set(i,"购票数量"))*int(chart1.set(choice,"门票价格")))
                     update_sum()
@@ -359,7 +359,7 @@ def select_data(table1,table2,label): # 选择票务信息
         choice=chart1.selection()[0]
         order(frm,'选择购票数量','购票数量：',int(chart1.set(choice,"门票剩余")),add_data)
 
-def finish_data(chart2,label): # 开始结账
+def finish_ticket(chart2,label): # 开始结账
     global ans
     the_data=[user_data[1], ans]
     for i in chart2.get_children():
@@ -368,8 +368,6 @@ def finish_data(chart2,label): # 开始结账
     if(len(chart2.get_children())==0):
         msg('err','提示','未选择任何门票信息！')
     elif(ticket_deal(the_data)):
-        # !!! 给出购票信息，修改余票数量
-        # 格式（比赛项目，购票数量，单项金额小计）
         msg('inf',"提示","购票成功！")
         label.configure(text="合计金额：0")
         call_ticket()
@@ -377,10 +375,101 @@ def finish_data(chart2,label): # 开始结账
         msg('err',"提示","订单提交失败，请稍后重试！")
         call_ticket()
 
-def history_data(): # 查看历史信息
+def history_ticket(): # 查看历史信息
     print(user_data[1])
     # !!! 给出用户账号，返回用户历史订单信息
 
+
+# --------- 购物页面 -----------
+
+def update_item(n,table1,table2,label):
+    def clear_all():
+        table1.search_data()
+        table2.delete_data()
+        label.configure(text="合计金额：0")
+    if(n==1): # 清空商品信息
+        print(table2.chart.get_children())
+        if(len(table2.chart.get_children())==0):
+            msg('err','提示','没有选择任何信息！')
+        else:
+            if(messagebox.askokcancel('提示', '确定要清空购物车信息吗？')):  
+                clear_all()
+    elif(n==2): # 刷新商品信息
+        if(len(table2.chart.get_children())==0):
+            clear_all()
+        elif(messagebox.askokcancel('提示', '刷新会清空购物车信息，确定要继续吗？')):
+            clear_all()
+    elif(n==3): # 删除部分商品信息
+        if(len(table2.chart.selection())==0):
+            msg('err','提示','没有选择任何信息！')
+        else:
+            if(messagebox.askokcancel('提示', '确定要取消订购已选中的商品吗？')):  
+                chart1=table1.chart
+                chart2=table2.chart
+                for i in chart1.get_children(): # 恢复
+                    for j in chart2.selection():
+                        if(chart1.set(i,"商品编号")==chart2.set(j,"商品编号")):
+                            chart1.set(i,"商品存量",int(chart1.set(i,"商品存量"))+int(chart2.set(j,"购买数量")))
+                table2.delete_data(1)
+                global ans
+                ans=0
+                for i in chart2.get_children(): 
+                    ans+=int(chart2.set(i,"金额小计"))
+                label.configure(text="合计金额："+str(ans))
+
+def select_item(table1,table2,label): # 选择商品信息
+    chart1=table1.chart
+    chart2=table2.chart
+    if(len(chart1.selection())==0):
+        msg('err','提示','未选择任何信息！')
+    elif(len(chart1.selection())>1):
+        msg('err','提示','一次只能选择一条信息！')
+    elif(int(chart1.set(chart1.selection()[0],"商品存量"))==0):
+        msg('err','提示','该商品已售罄！')
+    else:
+        def add_data(num):
+            print('购买数量为：'+str(num))
+            def update_sum(): # 计算总金额
+                global ans
+                ans=0 
+                for i in chart2.get_children(): 
+                    ans+=int(chart2.set(i,"金额小计"))
+                label.configure(text="合计金额："+str("%.1d"%(ans)))
+
+            chart1.set(choice,"商品存量",int(chart1.set(choice,"商品存量"))-num)
+            for i in chart2.get_children():
+                if(chart1.set(choice,"商品编号")==chart2.set(i,"商品编号")):
+                    chart2.set(i,"购买数量",int(chart2.set(i,"购买数量"))+num)
+                    chart2.set(i,"金额小计",int(chart2.set(i,"购买数量"))*int(chart1.set(choice,"商品价格")))
+                    update_sum()
+                    return
+            selection=[chart1.set(choice,"商品编号"),chart1.set(choice,"商品名称"),num,num*int(chart1.set(choice,"商品价格"))]
+            chart2.insert('',len(chart2.get_children()),values=selection)
+            update_sum()
+        choice=chart1.selection()[0]
+        order(frm,'选择购买数量','购买数量：',int(chart1.set(choice,"商品存量")),add_data)
+
+def finish_item(chart2,label): # 开始结账
+    global ans
+    the_data=[user_data[1], ans]
+    for i in chart2.get_children():
+        the_data.append((chart2.set(i,"商品编号"),int(chart2.set(i,"购买数量"))))
+    print(the_data)
+    if(len(chart2.get_children())==0):
+        msg('err','提示','未选择任何商品信息！')
+    elif(item_deal(the_data)):
+        # !!! 给出购票信息，修改余票数量
+        # 格式（比赛项目，购票数量，单项金额小计）
+        msg('inf',"提示","购买成功！")
+        label.configure(text="合计金额：0")
+        call_item()
+    else:
+        msg('err',"提示","订单提交失败，请稍后重试！")
+        call_item()
+
+def history_item(): # 查看历史信息
+    print(user_data[1])
+    # !!! 给出用户账号，返回用户历史订单信息
 
 # ------- 商品&票务管理 --------
 
@@ -559,9 +648,9 @@ def call_ticket(): # 票务页面
     clear()
     global frm
     frm=Frame(form)
-    form.geometry("840x400")
-    heads1=[('比赛编号','比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,60,140,260,320,380,460)]
-    heads2=[('比赛编号','比赛项目','购票数量','金额小计'),(0,60,140,220,300)]
+    form.geometry("850x400")
+    heads1=[('比赛编号','比赛项目','比赛时间','门票剩余','门票价格','比赛地点'),(0,60,140,260,320,380,500)]
+    heads2=[('比赛编号','比赛项目','购票数量','金额小计'),(0,60,140,200,270)]
     t_table1=table(frm,12,heads1,ticket_info)
     t_table2=table(frm,8,heads2,lambda:())
     l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
@@ -573,12 +662,12 @@ def call_ticket(): # 票务页面
     l_sum.grid(row=2,column=3,pady=8)
     Label(frm,text="票务信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
     Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
-    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_data(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8)
+    Button(frm,text="确定购票",width=12,font=('SimHei',12),command=lambda:finish_ticket(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8)
     Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_ticket(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=8)
     Button(frm,text="刷新票务信息",width=12,font=('SimHei',12),command=lambda:update_ticket(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=8)
     Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_ticket(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8)
-    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_data(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
-    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_data()).grid(row=4,column=3,columnspan=2,pady=8)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_ticket(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
+    Button(frm,text="查看订票历史",width=12,font=('SimHei',12),command=lambda:history_ticket()).grid(row=4,column=3,columnspan=2,pady=8)
     # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
     # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
     t_table1.search_data() # 初始化票务信息
@@ -587,7 +676,32 @@ def call_ticket(): # 票务页面
 
 def call_item(): # 商品页面
     clear()
-    pass
+    global frm
+    frm=Frame(form)
+    form.geometry("730x400")
+    heads1=[('商品编号','商品名称','商品价格','商品存量'),(0,60,160,240,320)]
+    heads2=[('商品编号','商品名称','购买数量','金额小计'),(0,60,160,240,320)]
+    t_table1=table(frm,12,heads1,item_info)
+    t_table2=table(frm,8,heads2,lambda:())
+    l_sum=Label(frm,text="合计金额：0",font=('SimHei',12))
+
+    t_table1.chart.grid(row=1,column=0,rowspan=3,columnspan=2,pady=5)
+    t_table1.ybar.grid(row=1,column=2,rowspan=3,sticky='ns',pady=5)
+    t_table2.chart.grid(row=1,column=3,columnspan=2,pady=10)
+    t_table2.ybar.grid(row=1,column=5,sticky='ns',pady=10)
+    l_sum.grid(row=2,column=3,pady=8)
+    Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=2)
+    Label(frm,text="购物车",font=('SimHei',16)).grid(row=0,column=3,columnspan=3)
+    Button(frm,text="确定购买",width=12,font=('SimHei',12),command=lambda:finish_item(t_table2.chart,l_sum)).grid(row=2,column=4,pady=8)
+    Button(frm,text="清除选择",width=12,font=('SimHei',12),command=lambda:update_item(1,t_table1,t_table2,l_sum)).grid(row=3,column=4,pady=8)
+    Button(frm,text="刷新商品信息",width=12,font=('SimHei',12),command=lambda:update_item(2,t_table1,t_table2,l_sum)).grid(row=4,column=0,pady=8)
+    Button(frm,text="取消选择",width=12,font=('SimHei',12),command=lambda:update_item(3,t_table1,t_table2,l_sum)).grid(row=3,column=3,pady=8)
+    Button(frm,text="加入购物车",width=12,font=('SimHei',12),command=lambda:select_item(t_table1,t_table2,l_sum)).grid(row=4,column=1,pady=8)
+    Button(frm,text="查看购物历史",width=12,font=('SimHei',12),command=lambda:history_item()).grid(row=4,column=3,columnspan=2,pady=8)
+    # t_table1.chart.bind('<Double-1>',lambda event:select_data(t_table1,t_table2,l_sum)) # 双击加入购物车
+    # t_table2.chart.bind('<Double-1>',lambda event:update_ticket(3,t_table1,t_table2,l_sum)) # 双击清出购物车
+    t_table1.search_data() # 初始化票务信息
+    frm.pack(padx=20,pady=20)
 
 
 def call_manager(): # 票务&商品管理页面

@@ -264,22 +264,20 @@ def ticket_deal(tup, *arg):              # 购票结账
     try:
         sum = tup[1]
         account = tup[0]
-        import time
-        date = time.strftime("%Y-%m-%d", time.localtime())
-        cursor.execute("insert into ticketdeal values (LPAD(q_dno.nextVal,8,0), '%s', %d, '%s')"%(date, sum, account))
+        cursor.execute("insert into ticketdeal values (LPAD(q_dno.nextVal,8,0),sysdate,%d,'%s')"%(sum,account))
         for i in range (2, len(tup)):
-            cursor.execute("insert into ticketsale values (LPAD(q_dno.currVal,8,0), '%s', %d)"%(tup[i][0], tup[i][1]))
+            cursor.execute("insert into ticketsale values (LPAD(q_dno.currVal,8,0), '%s', %d)"%(tup[i][0],tup[i][1]))
             cursor.execute("select remain from match where mno = '%s'"%(tup[i][0]))
             remain = cursor.fetchone()[0]
-            cursor.execute("update match set remain ='%s' where mno='%s'"%(remain - tup[i][1],tup[i][0]))
+            cursor.execute("update match set remain =%d where mno='%s'"%(remain-tup[i][1],tup[i][0]))
         commit()
         return True
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         rollback()
         return False
-        
-# ------------------- 票务和物品管理部分 ------------------
+
+# ------------------------- 商品信息部分 ------------------------------
 
 def item_info(*arg):                            # 获取商品信息
     try:
@@ -290,6 +288,27 @@ def item_info(*arg):                            # 获取商品信息
         msg('err','错误',str(e))
         rollback()
         return False
+
+def item_deal(tup,*arg):                        # 购物结账
+    try:
+        sum = tup[1]
+        account = tup[0]
+        cursor.execute("insert into itemdeal values (LPAD(q_dno.nextVal,8,0),sysdate,%d,'%s')"%(sum,account))
+        for i in range (2, len(tup)):
+            cursor.execute("insert into itemsale values (LPAD(q_dno.currVal,8,0), '%s', %d)"%(tup[i][0],tup[i][1]))
+            cursor.execute("select storage from item where ino ='%s'"%(tup[i][0]))
+            storage = cursor.fetchone()[0]
+            cursor.execute("update item set storage =%d where ino='%s'"%(storage-tup[i][1],tup[i][0]))
+        commit()
+        return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        rollback()
+        return False
+
+
+# ------------------- 票务和物品管理部分 ------------------
+
 
 def supply_ticket(mno,total,remain):      # 补充门票数量
     try:
