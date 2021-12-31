@@ -4,7 +4,7 @@
 
 ## 不留大作业过年！
 
-![image-20211231210726767](C:\Users\zy\AppData\Roaming\Typora\typora-user-images\image-20211231210726767.png)
+![image-20211231210726767](figures/cover.png)
 
 ---
 
