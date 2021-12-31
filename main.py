@@ -534,7 +534,7 @@ def new_matchs(table):
             else:
                 self.form.focus_set()
 
-    match_subform(frm,'创建新的比赛项目',[('比赛项目','请输入比赛项目',0),('比赛月份','请选择比赛月份',1,list(range(1,13))),('比赛日期','请选择比赛日期',1,list(range(1,32))),('比赛时间','格式HH:MM-HH:MM',0),('门票数量','请输入门票单价',0),('门票单价','请输入门票单价',0),('比赛场馆','请选择比赛场馆',1,get_venue())])
+    match_subform(frm,'创建新的比赛项目',[('比赛项目','请输入比赛项目',0),('比赛月份','请选择比赛月份',1,list(range(1,13))),('比赛日期','请选择比赛日期',1,list(range(1,32))),('比赛时间','格式HH:MM-HH:MM',0),('门票数量','请输入门票数量',0),('门票单价','请输入门票单价',0),('比赛场馆','请选择比赛场馆',1,get_venue())])
 
 def supply_tickets(table):
     chart=table.chart
@@ -647,9 +647,8 @@ def check_volunteers(n,table1,table2): # 审批志愿者申请
             if(approve_volunteer(n,chart.set(i,"用户账号"))):
                 tmp_flag=False
                 break
-            else:
-                table1.delete_data(1)
     if(tmp_flag):
+        table1.delete_data(1)
         table2.search_data(2)
         commit()
     else:
