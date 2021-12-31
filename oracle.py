@@ -1,4 +1,3 @@
-from tkinter.constants import TRUE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
 # import os
