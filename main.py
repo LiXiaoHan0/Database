@@ -583,9 +583,9 @@ def supply_items(table):
 def ticket_summary_data(*arg):
     #coding:utf-8
     import matplotlib.pyplot as plt
-    plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
-    plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
-    #有中文出现的情况，需要u'内容'
+    plt.rcParams['font.sans-serif']=['SimHei'] # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus']=False # 用来正常显示负号
+    # 有中文出现的情况，需要u'内容'
     data = ticket_statistical()
     # data形式为（比赛编号，比赛名称，销量）
     # print(data[0][1])
@@ -601,10 +601,10 @@ def ticket_summary_data(*arg):
     def add_labels(rects):
         for rect in rects:
             height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=8, color='black')
+            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=12, color='black')
             rect.set_edgecolor('black')
     add_labels(fig)
-    plt.title("门票销量统计图")
+    plt.title('门票销量统计图')
     plt.show()
 
 
@@ -629,10 +629,10 @@ def item_summary_data(*arg):
     def add_labels(rects):
         for rect in rects:
             height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=8, color='black')
+            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=12, color='black')
             rect.set_edgecolor('black')
     add_labels(fig1)
-    plt.title("商品销量统计图")
+    plt.title('商品销量统计图')
     plt.show()
 
 # ------- 志愿管理页面 --------
@@ -799,13 +799,14 @@ def call_manager(): # 票务&商品管理页面
     t_table1=table(frm,12,heads1,match_info)
     t_table2=table(frm,12,heads2,item_info)
 
-    t_table1.son.grid(row=1,column=0,columnspan=3,pady=5)
-    t_table2.son.grid(row=1,column=4,columnspan=3,pady=5)
-    Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0,columnspan=3)
-    Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
+    t_table1.son.grid(row=1,column=0,columnspan=2,pady=5)
+    t_table2.son.grid(row=1,column=4,columnspan=2,pady=5)
+    Label(frm,text="赛事信息",font=('SimHei',16)).grid(row=0,column=0)
+    Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4)
+    Button(frm,text="门票统计信息",width=12,font=('SimHei',12),command=ticket_summary_data).grid(row=0,column=1)
+    Button(frm,text="商品统计信息",width=12,font=('SimHei',12),command=item_summary_data).grid(row=0,column=5)
     Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_matchs(t_table1)).grid(row=2,column=0,pady=5)
     Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_tickets(t_table1)).grid(row=2,column=1,pady=5)
-    Button(frm,text="统计信息",width=12,font=('SimHei',12),command=ticket_summary_data).grid(row=2,column=2,pady=5)
     Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=5)
     Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_items(t_table2)).grid(row=2,column=5,pady=5)
     # t_table1.chart.bind('<Double-1>',lambda event:supply_tickets(t_table1)) # 双击补充门票
