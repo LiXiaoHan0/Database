@@ -293,6 +293,7 @@ def deal_detail(father,n): # 历史订单信息
             form=Toplevel(father)
             form.title("订单详细信息")
             form.geometry("320x280")
+            form.resizable(width=False, height=False)
             if(n==1):
                 heads=[('比赛项目','购票数量','金额小计'),(0,100,160,240)]
             elif(n==2):
@@ -310,6 +311,7 @@ def deal_detail(father,n): # 历史订单信息
     text=('购票历史信息','购物历史信息')
     form.title(text[n-1])
     form.geometry("380x320")
+    form.resizable(width=False, height=False)
     heads=[('订单编号','下单时间','合计金额'),(0,80,220,320)]
 
     frm=Frame(form)
@@ -332,10 +334,10 @@ def apply_volunteers(): # 申请成为志愿者
         msg('inf','提示','申请提交成功！')
     
 def show_volunteer(): # 查看志愿任务分配
-    if(user_data[5][0]!=''):
+    if(user_data[5][0]!='无'):
         msg('inf','志愿任务查看','您分配到的场馆为'+user_data[5][0]+'，您负责的工作是'+user_data[5][1]+'。')
     else:
-        msg('inf','您还没有被分配具体任务！')
+        msg('inf','提示','您还没有被分配具体任务，请等待管理员分配任务。')
 
 def quit_account(form): # 退出登录
     form.destroy()
