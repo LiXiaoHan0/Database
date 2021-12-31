@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 
+
 def insert():
     # 插入数据
     info = [
@@ -15,7 +16,6 @@ def insert():
         ]
     for index, data in enumerate(info):
         table.insert('', END, values=data)  # 添加数据到末尾
-
 
 if __name__ == '__main__':
     pass
@@ -28,6 +28,8 @@ if __name__ == '__main__':
     x = int((screenwidth - width) / 2)
     y = int((screenheight - height) / 2)
     win.geometry('{}x{}+{}+{}'.format(width, height, x, y))  # 大小以及位置
+
+
 
     tabel_frame = tkinter.Frame(win)
     tabel_frame.pack()
@@ -50,10 +52,10 @@ if __name__ == '__main__':
                       messagebox.showinfo('', '{}描述信息~~~'.format(name)))  # 定义表头
         table.column(column=column, width=100, minwidth=100, anchor=CENTER, )  # 定义列
     xscroll.config(command=table.xview)
-    xscroll.pack(side=BOTTOM, fill=X)
+    xscroll.pack(side=BOTTOM)
     yscroll.config(command=table.yview)
-    yscroll.pack(side=RIGHT, fill=Y)
-    table.pack(fill=BOTH, expand=True)
+    yscroll.pack(side=RIGHT)
+    table.pack(fill=BOTH)
 
     insert()
     insert()
@@ -62,4 +64,7 @@ if __name__ == '__main__':
     btn_frame = Frame()
     btn_frame.pack()
     Button(btn_frame, text='添加', bg='yellow', width=20, command=insert).pack()
+
+
+
     win.mainloop()
