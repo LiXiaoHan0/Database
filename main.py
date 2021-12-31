@@ -2,6 +2,7 @@ from tkinter import *
 from oracle import *
 from tkinter import ttk # 树状表格
 
+
 # 全局变量
 flag=0 # 连接情况
 debug=3 # 调试模式，可以跳过登录界面
@@ -577,8 +578,29 @@ def supply_items(table):
         
         order(frm,'补充商品数量','补充数量：',99,add_items)
 
-def summary_data():
-    pass
+def ticket_summary_data(*arg):
+    import matplotlib.pyplot as plt
+    data = ticket_statistical()
+    # data形式为（比赛编号，比赛名称，销量）
+    # print(data[0][1])
+    name_list = []
+    sold_list = []
+    for i in range (0,len(data)):
+        name_list.append(data[i][1])
+        sold_list.append(data[i][2])
+    fig = plt.bar(range(len(sold_list)), sold_list,tick_label = name_list)
+    
+    # 添加数据标签 就是矩形上面的数值
+
+    def add_labels(rects):
+        for rect in rects:
+            height = rect.get_height()
+            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=8, color='black')
+            rect.set_edgecolor('black')
+    add_labels(fig)
+    plt.show()
+
+    
 
 # ------- 志愿管理页面 --------
 
@@ -750,7 +772,7 @@ def call_manager(): # 票务&商品管理页面
     Label(frm,text="商品信息",font=('SimHei',16)).grid(row=0,column=4,columnspan=3)
     Button(frm,text="新建赛事",width=12,font=('SimHei',12),command=lambda:new_matchs(t_table1)).grid(row=2,column=0,pady=5)
     Button(frm,text="补充门票",width=12,font=('SimHei',12),command=lambda:supply_tickets(t_table1)).grid(row=2,column=1,pady=5)
-    Button(frm,text="统计信息",width=12,font=('SimHei',12),command=summary_data).grid(row=2,column=2,pady=5)
+    Button(frm,text="统计信息",width=12,font=('SimHei',12),command=ticket_summary_data).grid(row=2,column=2,pady=5)
     Button(frm,text="新建商品",width=12,font=('SimHei',12),command=lambda:new_items(t_table2)).grid(row=2,column=4,pady=5)
     Button(frm,text="补充商品",width=12,font=('SimHei',12),command=lambda:supply_items(t_table2)).grid(row=2,column=5,pady=5)
     # t_table1.chart.bind('<Double-1>',lambda event:supply_tickets(t_table1)) # 双击补充门票

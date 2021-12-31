@@ -1,8 +1,8 @@
 from tkinter.constants import TRUE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
-# import os
-# os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
+import os
+os.environ['path'] =  r'D:/Codefield/CODE_python/instantclient_21_3'
 
 
 # ------------------------ 通用函数 ----------------------
@@ -328,6 +328,16 @@ def item_deal(tup,*arg):                        # 购物结账
         rollback()
         return False
 
+def item_statistical(*arg):
+    try:
+        cursor.execute("select iname,ino, sum(quantity) from(select iname, itemsale.ino, quantity from itemsale ,item where item.ino=itemsale.ino) group by ino,iname order by sum(quantity) desc")
+        res = cursor.fetchall()
+        return res
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        rollback()
+        return False
+
 
 # ------------------- 票务和物品管理部分 ------------------
 
@@ -393,6 +403,16 @@ def add_new_match(event,time,total,price,month,day,venue):                # 创�
         commit()
         msg('inf','提示','赛事新建成功！')
         return True
+    except oracle.DatabaseError as e:
+        msg('err','错误',str(e))
+        rollback()
+        return False
+
+def ticket_statistical(*arg):
+    try:
+        cursor.execute("select mno, event, total - remain as sold from match order by sold desc")
+        res = cursor.fetchall()
+        return res
     except oracle.DatabaseError as e:
         msg('err','错误',str(e))
         rollback()
