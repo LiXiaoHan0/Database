@@ -122,6 +122,9 @@ def check(account, password):    # 登录检验
                         res = [state, account, name, sex, age]
                         return res
                     else:
+                        if(assign==None):
+                            res = [state, account, name, sex, age, ('无','无')]
+                            return res
                         cursor.execute("select detail, venue from assign where ano = '%s'" %assign)
                         (detail, vno) = cursor.fetchone()
                         cursor.execute("select vname from venue where vno = '%s'" %vno)
