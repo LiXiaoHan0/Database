@@ -581,7 +581,11 @@ def supply_items(table):
         order(frm,'补充商品数量','补充数量：',99,add_items)
 
 def ticket_summary_data(*arg):
+    #coding:utf-8
     import matplotlib.pyplot as plt
+    plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
+    #有中文出现的情况，需要u'内容'
     data = ticket_statistical()
     # data形式为（比赛编号，比赛名称，销量）
     # print(data[0][1])
@@ -600,9 +604,36 @@ def ticket_summary_data(*arg):
             plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=8, color='black')
             rect.set_edgecolor('black')
     add_labels(fig)
+    plt.title("门票销量统计图")
     plt.show()
 
+
+def item_summary_data(*arg):
+    #coding:utf-8
+    import matplotlib.pyplot as plt
+    plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
+    #有中文出现的情况，需要u'内容'
+    data1 = item_statistical()
+    # data形式为（比赛编号，比赛名称，销量）
+    # print(data[0][1])
+    name_list1 = []
+    sold_list1 = []
+    for i in range (0,len(data1)):
+        name_list1.append(data1[i][1])
+        sold_list1.append(data1[i][2])
+    fig1 = plt.bar(range(len(sold_list1)), sold_list1,tick_label = name_list1)
     
+    # 添加数据标签 就是矩形上面的数值
+
+    def add_labels(rects):
+        for rect in rects:
+            height = rect.get_height()
+            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=8, color='black')
+            rect.set_edgecolor('black')
+    add_labels(fig1)
+    plt.title("商品销量统计图")
+    plt.show()
 
 # ------- 志愿管理页面 --------
 
