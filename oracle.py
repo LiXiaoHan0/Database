@@ -333,7 +333,7 @@ def item_deal(tup,*arg):                        # 购物结账
 
 def item_statistical(*arg):
     try:
-        cursor.execute("select iname,ino, sum(quantity) from(select iname, itemsale.ino, quantity from itemsale ,item where item.ino=itemsale.ino) group by ino,iname order by sum(quantity) desc")
+        cursor.execute("select ino,iname, sum(quantity) from(select iname, itemsale.ino, quantity from itemsale ,item where item.ino=itemsale.ino) group by ino,iname order by sum(quantity) desc")
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
