@@ -17,6 +17,3 @@ Author: Han Li, Yi Zheng
 - cx_oracle 8.2.1
 - Matplotlib 3.4.3
 - Instant Client (Please download a suitable version through https://www.oracle.com/cn/database/technology/instant-client.html)
-
-
-

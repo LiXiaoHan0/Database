@@ -5,7 +5,7 @@ from tkinter import ttk # 树状表格
 
 # 全局变量
 flag=0 # 连接情况
-debug=3 # 调试模式，可以跳过登录界面
+debug=-1 # 调试模式，可以跳过登录界面
 user_data=(-1,'0','无','无',0,('无','无')) # 用户信息
 # -1:账号不存在或密码错误；
 # 0:未申请为志愿者；
@@ -586,35 +586,7 @@ def ticket_summary_data(*arg):
     plt.rcParams['font.sans-serif']=['SimHei'] # 用来正常显示中文标签
     plt.rcParams['axes.unicode_minus']=False # 用来正常显示负号
     # 有中文出现的情况，需要u'内容'
-    data = ticket_statistical()
-    # data形式为（比赛编号，比赛名称，销量）
-    # print(data[0][1])
-    name_list = []
-    sold_list = []
-    for i in range (0,len(data)):
-        name_list.append(data[i][1])
-        sold_list.append(data[i][2])
-    fig = plt.bar(range(len(sold_list)), sold_list,tick_label = name_list)
-    
-    # 添加数据标签 就是矩形上面的数值
-
-    def add_labels(rects):
-        for rect in rects:
-            height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=12, color='black')
-            rect.set_edgecolor('black')
-    add_labels(fig)
-    plt.title('门票销量统计图')
-    plt.show()
-
-
-def item_summary_data(*arg):
-    #coding:utf-8
-    import matplotlib.pyplot as plt
-    plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
-    plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
-    #有中文出现的情况，需要u'内容'
-    data1 = item_statistical()
+    data1 = ticket_statistical()
     # data形式为（比赛编号，比赛名称，销量）
     # print(data[0][1])
     name_list1 = []
@@ -632,6 +604,34 @@ def item_summary_data(*arg):
             plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=12, color='black')
             rect.set_edgecolor('black')
     add_labels(fig1)
+    plt.title('门票销量统计图')
+    plt.show()
+
+
+def item_summary_data(*arg):
+    #coding:utf-8
+    import matplotlib.pyplot as plt
+    plt.rcParams['font.sans-serif']=['SimHei'] # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus']=False # 用来正常显示负号
+    #有中文出现的情况，需要u'内容'
+    data2 = item_statistical()
+    # data形式为（比赛编号，比赛名称，销量）
+    # print(data[0][1])
+    name_list2 = []
+    sold_list2 = []
+    for i in range (0,len(data2)):
+        name_list2.append(data2[i][1])
+        sold_list2.append(data2[i][2])
+    fig2 = plt.bar(range(len(sold_list2)), sold_list2,tick_label = name_list2)
+    
+    # 添加数据标签 就是矩形上面的数值
+
+    def add_labels(rects):
+        for rect in rects:
+            height = rect.get_height()
+            plt.text(rect.get_x() + rect.get_width()/2, height+0.01*height, '%.0f'%height, ha='center', va='bottom', fontsize=12, color='black')
+            rect.set_edgecolor('black')
+    add_labels(fig2)
     plt.title('商品销量统计图')
     plt.show()
 
@@ -865,6 +865,11 @@ if(user_data[0]>=0):
     form.config(menu=option)
 
     call_info()
+
+    # import tkinter
+    # photo = tkinter.PhotoImage(file="figures/background.png") # 背景图片
+    # back_Label = tkinter.Label(form,justify=tkinter.LEFT,image=photo,compound = tkinter.CENTER,fg="white")
+    # back_Label.pack()
     form.mainloop()
 
 finish(flag) # 结束数据库连接

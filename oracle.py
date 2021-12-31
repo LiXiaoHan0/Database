@@ -1,4 +1,3 @@
-from tkinter.constants import TRUE
 import cx_Oracle as oracle # 引入oracle数据库模块
 #32位的Oracle系统可以通过安装instantclient并运行下面两行代码成功运行在64位的python环境，记得修改路径！
 # import os
@@ -333,7 +332,7 @@ def item_deal(tup,*arg):                        # 购物结账
 
 def item_statistical(*arg):
     try:
-        cursor.execute("select iname,ino, sum(quantity) from(select iname, itemsale.ino, quantity from itemsale ,item where item.ino=itemsale.ino) group by ino,iname order by sum(quantity) desc")
+        cursor.execute("select ino,iname, sum(quantity) from(select iname, itemsale.ino, quantity from itemsale ,item where item.ino=itemsale.ino) group by ino,iname order by sum(quantity) desc")
         res = cursor.fetchall()
         return res
     except oracle.DatabaseError as e:
